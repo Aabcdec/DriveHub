@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.web.Mapper.TFollowDao">
+    <resultMap id="BaseResultMap" type="com.example.web.Bean.TFollow">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="follow_type" jdbcType="VARCHAR" property="followType" />
+        <result column="follow_text" jdbcType="VARCHAR" property="followText" />
+        <result column="follow_state" jdbcType="VARCHAR" property="followState" />
+        <result column="next_time" jdbcType="VARCHAR" property="nextTime" />
+        <result column="create_time" jdbcType="VARCHAR" property="createTime" />
+        <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+        <result column="f_id" jdbcType="VARCHAR" property="fId" />
+    </resultMap>
+    <insert id="saveFollow" keyColumn="id" keyProperty="id" parameterType="com.example.web.Bean.TFollow" useGeneratedKeys="true">
+        insert into t_follow(follow_type,follow_text,follow_state,next_time,create_time,create_by,f_id)
+                    values(#{followType},#{followText},#{followState},#{nextTime},#{createTime},#{createBy},#{fId})
+    </insert>
+    <update id="tFollowDao">
+        update t_follow set follow_type=#{followType},
+        follow_text=#{followText},follow_state=#{followState},
+        next_time=#{nextTime},create_by=#{createBy} where f_id=#{fId} and id=#{id}
+    </update>
+    <delete id="byDeleteIdFollow">
+        delete from t_follow WHERE f_id=#{fId} and id=#{id};
+    </delete>
+    <delete id="deteleByIdFollow">
+        delete from t_follow where f_id=#{fId}
+    </delete>
+    <select id="byIdFollow" resultType="com.example.web.Bean.TFollow" resultMap="BaseResultMap">
+        select * from t_follow WHERE f_id=#{fId};
+    </select>
+</mapper>

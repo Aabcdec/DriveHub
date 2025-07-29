@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.web.Mapper.ImagesDao">
+    <resultMap id="BaseResultMap" type="com.example.web.query.Images">
+        <id column="img_id" jdbcType="INTEGER" property="imgId" />
+        <result column="aid" jdbcType="VARCHAR" property="aid" />
+        <result column="image" jdbcType="TIMESTAMP" property="image" />
+    </resultMap>
+    <insert id="addImage">
+        insert into images (aid,image) values (#{aid},#{image})
+    </insert>
+    <select id="ImagesByAid" parameterType="int" resultMap="BaseResultMap">
+        select *  from images where aid=#{aid};
+    </select>
+</mapper>

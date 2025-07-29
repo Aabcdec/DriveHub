@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.web.Mapper.WxUser">
+    <resultMap id="BaseResultNameMap" type="com.example.web.Bean.User">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="phone" jdbcType="VARCHAR" property="phone" />
+        <result column="openid" jdbcType="VARCHAR" property="openid" />
+        <result column="unionid" jdbcType="VARCHAR" property="unionid" />
+        <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+        <result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl" />
+        <result column="gender" jdbcType="INTEGER" property="gender" />
+        <result column="city" jdbcType="VARCHAR" property="city" />
+        <result column="province" jdbcType="VARCHAR" property="province" />
+        <result column="country" jdbcType="VARCHAR" property="country" />
+        <result column="language" jdbcType="VARCHAR" property="language" />
+        <result column="status"  jdbcType="INTEGER" property="status"/>
+        <result column="last_login_time" jdbcType="TIMESTAMP" property="lastLoginTime" />
+        <result column="createAt" jdbcType="TIMESTAMP" property="createdAt" />
+        <result column="updatedAt" jdbcType="TIMESTAMP" property="updatedAt" />
+    </resultMap>
+    <resultMap id="BaseWxUserMap" type="com.example.web.query.WxLogoutQuery">
+        <result column="phone" jdbcType="VARCHAR" property="phone" />
+        <result column="userId" jdbcType="VARCHAR" property="userId" />
+        <result column="logoutTime" jdbcType="TIMESTAMP" property="logoutTime" />
+        <result column="action" jdbcType="VARCHAR" property="action" />
+    </resultMap>
+    <insert id="savaUser">
+        INSERT INTO users
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="phone != null">phone,</if>
+            <if test="openid != null">openid,</if>
+            <if test="unionid != null">unionid,</if>
+            <if test="nickname != null">nickname,</if>
+            <if test="avatarUrl != null">avatar_url,</if>
+            <if test="gender != null">gender,</if>
+            <if test="city != null">city,</if>
+            <if test="province != null">province,</if>
+            <if test="country != null">country,</if>
+            <if test="language != null">language,</if>
+            <if test="status != null">status,</if>
+            <if test="isVerified != null">is_verified,</if>
+            <if test="lastLoginTime != null">last_login_time,</if>
+            created_at,
+            updated_at,
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="openid != null">#{openid},</if>
+            <if test="unionid != null">#{unionid},</if>
+            <if test="nickname != null">#{nickname},</if>
+            <if test="avatarUrl != null">#{avatarUrl},</if>
+            <if test="gender != null">#{gender},</if>
+            <if test="city != null">#{city},</if>
+            <if test="province != null">#{province},</if>
+            <if test="country != null">#{country},</if>
+            <if test="language != null">#{language},</if>
+            <if test="status != null">#{status},</if>
+            <if test="isVerified != null">#{isVerified},</if>
+            <if test="lastLoginTime != null">#{lastLoginTime},</if>
+            NOW(),
+            NOW(),
+        </trim>
+    </insert>
+    <insert id="signUpDate">
+        INSERT INTO user_activity
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            user_id,
+            activity_id,
+            <if test="signUpTime != null">register_time,</if>
+            <if test="status != null">status,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{phone},
+            #{actId},
+            <if test="signUpTime != null">now(),</if>
+            <if test="status != null">status,</if>
+        </trim>
+    </insert>
+    <update id="userLogout" parameterType="com.example.web.query.WxLogoutQuery">
+        update users set last_login_time=NOW() where phone=#{phone}
+    </update>
+    <delete id="cancelSigun">
+        DELETE FROM user_activity
+        WHERE user_id = #{userId}
+        AND activity_id = #{activityId}
+    </delete>
+    <select id="checkUser" resultType="com.example.web.query.WxLogoutQuery" resultMap="BaseWxUserMap">
+        select * from users where phone=#{phone}
+    </select>
+</mapper>
