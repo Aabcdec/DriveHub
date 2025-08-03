@@ -15,6 +15,12 @@
     from t_role
     where id = #{id,jdbcType=INTEGER}
   </select>
+    <select id="getRoleByUser" resultType="com.example.web.Bean.TUser">
+      select * from t_user WHERE id in (select user_id from t_user_role WHERE role_id=#{roleId});
+    </select>
+  <select id="getRoles" resultType="com.example.web.Bean.TRole" resultMap="BaseResultMap">
+    select * from t_role
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from t_role
     where id = #{id,jdbcType=INTEGER}
@@ -42,6 +48,16 @@
       </if>
     </trim>
   </insert>
+  <insert id="addRole">
+    insert into t_user_role (user_id, role_id) VALUES
+    <foreach collection="userIds" item="userId" separator=",">
+      (#{userId}, #{id})
+    </foreach>
+  </insert>
+  <insert id="addRoles">
+    insert into t_role values(null,#{role},#{roleName})
+  </insert>
+
   <update id="updateByPrimaryKeySelective" parameterType="com.example.web.Bean.TRole">
     update t_role
     <set>
@@ -58,6 +74,18 @@
     update t_role
     set `role` = #{role,jdbcType=VARCHAR},
       role_name = #{roleName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateRole">
+    update t_role
+    <set>
+      <if test="addRoleBean.role != null">
+        `role` = #{addRoleBean.role,jdbcType=VARCHAR},
+      </if>
+      <if test="addRoleBean.roleName != null">
+        role_name = #{addRoleBean.roleName,jdbcType=VARCHAR},
+      </if>
+    </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>

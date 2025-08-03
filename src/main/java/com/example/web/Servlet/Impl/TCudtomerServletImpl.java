@@ -8,6 +8,7 @@ import com.example.web.Mapper.TCustomerDao;
 import com.example.web.Servlet.TCudtomerServlet;
 import com.example.web.constant.Constants;
 import com.example.web.query.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
@@ -18,6 +19,7 @@ import java.util.List;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
+@Slf4j
 //如何异常都回滚
 public class TCudtomerServletImpl implements TCudtomerServlet {
     @Resource
@@ -99,13 +101,20 @@ public class TCudtomerServletImpl implements TCudtomerServlet {
     public List<TCustomer> BysearchCustomer(searchCustomerQuery searchCustomerQuery) {
         return tCustomerDao.BysearchCustomer(searchCustomerQuery);
     }
-
     @Override
     public int updataCustomer(Long id, CustomerForm customerForm) {
+        // 1. 验证输入参数
+        if (customerForm == null) {
+            throw new IllegalArgumentException("客户表单数据不能为空");
+        }
+
+        // 2. 准备更新对象
         TClue tClue = new TClue();
         tClue.setAddress(customerForm.getAddress());
         tClue.setEmail(customerForm.getEmail());
-        if(customerForm.getCreateBy().equals("管理员")){
+
+        // 3. 处理创建者映射（建议使用枚举或常量）
+        if (customerForm.getCreateBy().equals("管理员")) {
             tClue.setCreateBy(1);
         } else if (customerForm.getCreateBy().equals("于嫣")) {
             tClue.setCreateBy(2);
@@ -115,27 +124,110 @@ public class TCudtomerServletImpl implements TCudtomerServlet {
             tClue.setCreateBy(4);
         } else if (customerForm.getCreateBy().equals("吴潇潇")) {
             tClue.setCreateBy(5);
-        }else{
-            tClue.setCreateBy(0);
+        } else {
+            tClue.setCreateBy(0); // 默认值，确保数据库允许0值
         }
-        if(customerForm.getStatus().equals("有意向")){
-            tClue.setState(1);
-        } else if (customerForm.getStatus().equals("无意向")) {
-            tClue.setState(2);
+
+        // 4. 处理状态映射 - 关键修改部分
+        Integer stateValue = 0; // 默认值
+        if (customerForm.getStatus() != null) {
+            switch (customerForm.getStatus()) {
+                case "有意向":
+                    stateValue = 1;
+                    break;
+                case "无意向":
+                    stateValue = 2;
+                    break;
+                case "意向不明":
+                    stateValue = 3;
+                    break;
+                default:
+                    stateValue = 0;
+                    break;
+            }
         }
-        else if (customerForm.getStatus().equals("意向不明")) {
-            tClue.setState(3);
-        }else{
-            tClue.setState(0);
+
+        // 5. 验证状态值是否有效（解决外键约束问题）
+        if (!isValidState(stateValue)) {
+            throw new IllegalStateException("无效的客户状态值: " + stateValue +
+                    "。请确保使用有效的状态值（1-有意向，2-无意向，3-意向不明）");
         }
+        tClue.setState(stateValue);
+
+        // 6. 设置其他字段
         tClue.setFullName(customerForm.getName());
         tClue.setPhone(customerForm.getPhone());
         tClue.setId(customerForm.getClueId());
-        System.out.println(tClue.toString());
-        int i = tClueDao.updateByPrimaryKeySelective(tClue);
-        System.out.println(i);
-        return tCustomerDao.updataCustomer(id,customerForm);
+
+        // 7. 日志记录（使用正式日志框架如SLF4J更好）
+        log.debug("准备更新的客户数据: {}", tClue);
+
+        // 8. 执行更新
+        int updateCount = tClueDao.updateByPrimaryKeySelective(tClue);
+        log.debug("更新影响行数: {}", updateCount);
+
+        // 9. 更新客户表（确保这个方法不会引起其他问题）
+        return tCustomerDao.updataCustomer(id, customerForm);
     }
+
+    // 验证状态值是否存在于字典表中
+    private boolean isValidState(Integer stateValue) {
+        if (stateValue == null) {
+            return false;
+        }
+        // 假设有一个字典服务或mapper可以验证状态值
+        // 这里需要根据您的实际实现来编写
+        try {
+            // 示例1: 使用MyBatis mapper
+            // return dicValueMapper.existsById(stateValue);
+
+            // 示例2: 如果状态值是固定的几个值
+            return stateValue >= -1 && stateValue <= 30; // 根据您的实际有效范围调整
+
+            // 示例3: 查询数据库验证
+            // TDicValue dicValue = dicValueMapper.selectByPrimaryKey(stateValue);
+            // return dicValue != null;
+        } catch (Exception e) {
+            log.error("验证状态值失败", e);
+            return false;
+        }
+    }
+//    @Override
+//    public int updataCustomer(Long id, CustomerForm customerForm) {
+//        TClue tClue = new TClue();
+//        tClue.setAddress(customerForm.getAddress());
+//        tClue.setEmail(customerForm.getEmail());
+//        if(customerForm.getCreateBy().equals("管理员")){
+//            tClue.setCreateBy(1);
+//        } else if (customerForm.getCreateBy().equals("于嫣")) {
+//            tClue.setCreateBy(2);
+//        } else if (customerForm.getCreateBy().equals("张琪")) {
+//            tClue.setCreateBy(3);
+//        } else if (customerForm.getCreateBy().equals("苏蜿婷")) {
+//            tClue.setCreateBy(4);
+//        } else if (customerForm.getCreateBy().equals("吴潇潇")) {
+//            tClue.setCreateBy(5);
+//        }else{
+//            tClue.setCreateBy(0);
+//        }
+//        if(customerForm.getStatus().equals("有意向")){
+//            tClue.setState(1);
+//        } else if (customerForm.getStatus().equals("无意向")) {
+//            tClue.setState(2);
+//        }
+//        else if (customerForm.getStatus().equals("意向不明")) {
+//            tClue.setState(3);
+//        }else{
+//            tClue.setState(0);
+//        }
+//        tClue.setFullName(customerForm.getName());
+//        tClue.setPhone(customerForm.getPhone());
+//        tClue.setId(customerForm.getClueId());
+//        System.out.println(tClue.toString());
+//        int i = tClueDao.updateByPrimaryKeySelective(tClue);
+//        System.out.println(i);
+//        return tCustomerDao.updataCustomer(id,customerForm);
+//    }
 
     @Override
     public List<Long> getCustomerId() {

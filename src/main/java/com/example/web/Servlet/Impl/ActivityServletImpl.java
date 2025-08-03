@@ -3,6 +3,7 @@ package com.example.web.Servlet.Impl;
 import com.example.web.Bean.TActivity;
 import com.example.web.Mapper.TActivityDao;
 import com.example.web.Servlet.ActivityServlet;
+import com.example.web.query.ActiveProductQuery;
 import com.example.web.query.BaseQuery;
 import com.example.web.query.Images;
 import com.example.web.query.myUpSignUpDataQuery;
@@ -74,7 +75,7 @@ public class ActivityServletImpl implements ActivityServlet {
     }
 
     @Override
-    public TActivity selectByPrimaryKey(Integer id) {
+    public ActiveProductQuery selectByPrimaryKey(Integer id) {
         return tActivityDao.selectByPrimaryKey(id);
     }
 
@@ -91,6 +92,16 @@ public class ActivityServletImpl implements ActivityServlet {
     @Override
     public List<TActivity> selectByIdsSignUpData(myUpSignUpDataQuery myUpSignUpDataQuery) {
         return tActivityDao.selectByIdsSignUpData(myUpSignUpDataQuery);
+    }
+
+    @Override
+    public Integer deleteParty(Integer id) {
+        return tActivityDao.deleteParty(id);
+    }
+
+    @Override
+    public int updateActProduct(Integer id, Integer productId) {
+        return tActivityDao.updateActProduct(id,productId);
     }
 
 

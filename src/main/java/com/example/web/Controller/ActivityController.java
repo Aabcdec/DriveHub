@@ -2,6 +2,7 @@ package com.example.web.Controller;
 
 import com.example.web.Bean.TActivity;
 import com.example.web.Servlet.ActivityServlet;
+import com.example.web.query.ActiveProductQuery;
 import com.example.web.query.IdListRequest;
 import com.example.web.query.myUpSignUpDataQuery;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,10 @@ public class ActivityController {
     @GetMapping("/market/campaigns")
     public List<TActivity> campaigns(@RequestParam("pageNum") Integer pageNum, @RequestParam("pageSize") Integer pageSize){
        return activityServlet.getActs(pageNum,pageSize);
+    }
+    @GetMapping("/updateActProduct/{id}")
+    public int updateActProduct(@PathVariable("id")Integer id,@RequestParam("productId")Integer productId){
+        return activityServlet.updateActProduct(id,productId);
     }
     @GetMapping("/getActAll")
     public List<TActivity> getActAll(){
@@ -51,7 +56,7 @@ public class ActivityController {
         return activityServlet.selectByIdsSignUpData(myUpSignUpDataQuery);
     }
     @GetMapping("/getActDetail")
-    public TActivity selectByPrimaryKey(@RequestParam("id") int id){
+    public ActiveProductQuery selectByPrimaryKey(@RequestParam("id") int id){
         return activityServlet.selectByPrimaryKey(id);
     }
     @PostMapping("/activity/register")
@@ -62,5 +67,9 @@ public class ActivityController {
     public Integer updateParty(@RequestParam("id") Integer id){
         System.out.println(id);
         return activityServlet.updateParty(id);
+    }
+    @GetMapping("/deleteParty")
+    public Integer deleteParty(@RequestParam("id") Integer id){
+        return activityServlet.deleteParty(id);
     }
 }

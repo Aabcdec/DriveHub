@@ -2,6 +2,7 @@ package com.example.web.Mapper;
 
 import com.example.web.Bean.TActivity;
 import com.example.web.commons.DataScope;
+import com.example.web.query.ActiveProductQuery;
 import com.example.web.query.BaseQuery;
 import com.example.web.query.myUpSignUpDataQuery;
 import org.apache.ibatis.annotations.Param;
@@ -17,7 +18,7 @@ public interface TActivityDao {
 
     int insertSelective(TActivity record);
 
-    TActivity selectByPrimaryKey(Integer id);
+    ActiveProductQuery selectByPrimaryKey(Integer id);
 
     int updateByPrimaryKeySelective(TActivity record);
 
@@ -36,4 +37,8 @@ public interface TActivityDao {
     Integer selecOngoingActivity();
 
     Integer selectByCount();
+
+    Integer deleteParty(@Param("id") Integer id);
+
+    int updateActProduct(@Param("id")Integer id, @Param("productId")Integer productId);
 }

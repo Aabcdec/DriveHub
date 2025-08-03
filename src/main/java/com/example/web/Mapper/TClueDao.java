@@ -33,7 +33,7 @@ public interface TClueDao {
     int updateByPrimaryKey(TClue record);
     @DataScope(tableAlias="tc",tableField = "owner_id")
     List<TClue> getClues(@Param("pageNum") Integer pageNum, @Param("pageSize") Integer pageSize, @Param("query") BaseQuery baseQuery);
-    List<TClue> selectByIdAndDateRange(TClue tClue);
+   List<TClue> selectByIdAndDateRange(TClue tClue);
 
     int deteleByIdClue(Integer id);
 
@@ -50,4 +50,9 @@ public interface TClueDao {
     List<YearLineData> getByYearLineXConverterDate();
 
     List<MonthLineData> getByMouthLineConveterData();
+
+    int deleteByIdCustom(@Param("id") Integer id);
+    //逻辑删除
+    int updateDelete(@Param("id") Integer id);
+
 }

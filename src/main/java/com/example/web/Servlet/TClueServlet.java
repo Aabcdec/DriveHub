@@ -15,5 +15,5 @@ public interface TClueServlet {
 
     void importExcel(InputStream inputStream,int createId);
 
-    int deteleByIdClue(Integer id);
+    int deteleByIdClue(@Param("id") Integer id);
 }

@@ -44,7 +44,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-
+<!--        导入redisson 分布式锁-->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+            <version>3.16.8</version> <!-- 与Spring Boot 2.6.x对齐 -->
+        </dependency>
         <!-- Spring Boot Starter Cache -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

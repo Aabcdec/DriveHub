@@ -2,6 +2,8 @@ package com.example.web.Mapper;
 
 import com.example.web.Bean.TSystemInfo;
 
+import java.util.List;
+
 public interface TSystemInfoDao {
     int deleteByPrimaryKey(Integer id);
 
@@ -14,4 +16,6 @@ public interface TSystemInfoDao {
     int updateByPrimaryKeySelective(TSystemInfo record);
 
     int updateByPrimaryKey(TSystemInfo record);
+
+    List<TSystemInfo> getSystemInfos();
 }

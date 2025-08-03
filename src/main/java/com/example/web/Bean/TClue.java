@@ -142,6 +142,15 @@ public class TClue implements Serializable {
      * 创建人
      */
     private Integer createBy;
+    private Integer currentPage;
+
+    public Integer getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(Integer currentPage) {
+        this.currentPage = currentPage;
+    }
 
     /**
      * 编辑时间
@@ -392,6 +401,7 @@ public class TClue implements Serializable {
                 ", nextContactTime=" + nextContactTime +
                 ", createTime=" + createTime +
                 ", createBy=" + createBy +
+                ", currentPage=" + currentPage +
                 ", editTime=" + editTime +
                 ", total=" + total +
                 ", activityName='" + activityName + '\'' +

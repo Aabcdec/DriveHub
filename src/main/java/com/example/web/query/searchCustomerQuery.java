@@ -7,5 +7,5 @@ public class searchCustomerQuery {
     private String name;
     private String address;
     private int status;
-    private int manager;
+    private int createBy;
 }

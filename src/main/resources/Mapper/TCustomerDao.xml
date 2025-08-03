@@ -188,8 +188,8 @@
       <if test="status!=null and status!=''">
         and tc.intention_state=#{status}
       </if>
-      <if test="manager!=null and manager!=''">
-        and tc.create_by=#{manager}
+      <if test="createBy!=null and createBy!=''">
+        and tc.create_by=#{createBy}
       </if>
     </where>
   </select>

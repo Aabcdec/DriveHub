@@ -22,13 +22,11 @@ public class TClueServletImpl implements TClueServlet {
     @Resource
     private TCustomerDao tCustomerDao;
     @Override
-    @Cacheable("clue")
     public TClue selectByPrimaryKey(Integer id) {
         return tClueDao.selectByPrimaryKey(id);
     }
 
     @Override
-    @Cacheable("clue")
     public List<TClue> getClues(Integer pageNum, Integer pageSize) {
         //起始页等于页码减一*页面大小
         pageNum=(pageNum-1)*pageSize;
@@ -46,7 +44,6 @@ public class TClueServletImpl implements TClueServlet {
     }
 
     @Override
-    @Cacheable("clue")
     public List<TClue> selectByIdAndDateRange(TClue tClue) {
 
         return tClueDao.selectByIdAndDateRange(tClue);
@@ -62,11 +59,9 @@ public class TClueServletImpl implements TClueServlet {
 
     @Override
     public int deteleByIdClue(Integer id) {
-        int i = tCustomerDao.deleteByIdCustom(id);
-        if(i==1){
-            System.out.println("验证客户是否删除"+i);
-            return tClueDao.deteleByIdClue(id);
-        }
-        return 0;
+
+           //逻辑删除
+            return tClueDao.updateDelete(id);
+
     }
 }

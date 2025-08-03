@@ -1,6 +1,7 @@
 package com.example.web.Servlet;
 
 import com.example.web.Bean.TActivity;
+import com.example.web.query.ActiveProductQuery;
 import com.example.web.query.Images;
 import com.example.web.query.myUpSignUpDataQuery;
 
@@ -17,9 +18,13 @@ public interface ActivityServlet {
     int deleteById(Integer id);
      List<TActivity> queryByIdAndDate(Integer id, Date startTime, Date endTime);
     List<TActivity>selectByIdsAct(List<Long> ids);
-    TActivity selectByPrimaryKey(Integer id);
+    ActiveProductQuery selectByPrimaryKey(Integer id);
     int increaseParticipants(Integer id);
     Integer updateParty(Integer id);
 
     List<TActivity> selectByIdsSignUpData(myUpSignUpDataQuery myUpSignUpDataQuery);
+
+    Integer deleteParty(Integer id);
+
+    int updateActProduct(Integer id, Integer productId);
 }
