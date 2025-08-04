@@ -64,5 +64,6 @@ public class ActiveProductQuery {
     private Double quotation;
     private String active;
     private String activeType;
+    private Integer total;
 
 }

@@ -41,4 +41,6 @@ public interface TActivityDao {
     Integer deleteParty(@Param("id") Integer id);
 
     int updateActProduct(@Param("id")Integer id, @Param("productId")Integer productId);
+
+    int updateByIdActive(@Param("id") Integer id);
 }

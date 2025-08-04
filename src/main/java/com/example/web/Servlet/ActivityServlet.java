@@ -27,4 +27,6 @@ public interface ActivityServlet {
     Integer deleteParty(Integer id);
 
     int updateActProduct(Integer id, Integer productId);
+
+    int updateByIdActive(Integer id);
 }

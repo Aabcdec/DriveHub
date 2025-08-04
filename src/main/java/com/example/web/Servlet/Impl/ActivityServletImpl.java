@@ -104,5 +104,10 @@ public class ActivityServletImpl implements ActivityServlet {
         return tActivityDao.updateActProduct(id,productId);
     }
 
+    @Override
+    public int updateByIdActive(Integer id) {
+        return tActivityDao.updateByIdActive(id);
+    }
+
 
 }
