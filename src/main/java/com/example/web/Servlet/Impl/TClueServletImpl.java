@@ -28,10 +28,15 @@ public class TClueServletImpl implements TClueServlet {
 
     @Override
     public List<TClue> getClues(Integer pageNum, Integer pageSize) {
-        //起始页等于页码减一*页面大小
-        pageNum=(pageNum-1)*pageSize;
-        return tClueDao.getClues(pageNum,pageSize, BaseQuery.builder().build());
+        // 计算偏移量，但不修改原始参数
+        int offset = (pageNum - 1) * pageSize;
+        return tClueDao.getClues(offset, pageSize, BaseQuery.builder().build());
     }
+//    public List<TClue> getClues(Integer pageNum, Integer pageSize) {
+//        //起始页等于页码减一*页面大小
+//        pageNum=(pageNum-1)*pageSize;
+//        return tClueDao.getClues(pageNum,pageSize, BaseQuery.builder().build());
+//    }
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int insertSelective(TClue tClue) {
@@ -63,5 +68,15 @@ public class TClueServletImpl implements TClueServlet {
            //逻辑删除
             return tClueDao.updateDelete(id);
 
+    }
+
+    @Override
+    public int updataHeader(Integer fid) {
+        return tClueDao.updataHeader(fid);
+    }
+
+    @Override
+    public List<TClue> overdueClueList(Integer ownerId) {
+        return tClueDao.overdueClueList(ownerId);
     }
 }

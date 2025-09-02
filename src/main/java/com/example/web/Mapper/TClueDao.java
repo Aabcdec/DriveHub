@@ -55,4 +55,7 @@ public interface TClueDao {
     //逻辑删除
     int updateDelete(@Param("id") Integer id);
 
+    int updataHeader(@Param("id")Integer fid);
+
+    List<TClue> overdueClueList(@Param("ownerId") Integer ownerId);
 }

@@ -89,7 +89,22 @@
         WHERE user_id = #{userId}
         AND activity_id = #{activityId}
     </delete>
+    <update id="byUserIDAndActiveIdDeleteClue">
+        update t_clue set isdelete=1 where activity_id=#{actId} and phone=#{userId}
+    </update>
     <select id="checkUser" resultType="com.example.web.query.WxLogoutQuery" resultMap="BaseWxUserMap">
         select * from users where phone=#{phone}
     </select>
+    <select id="signUpActiveProductQuery" resultType="com.example.web.query.signUpActiveProductQuery">
+        select ta.owner_id AS ownerId, ta.name AS actName, ta.description, tp.id AS intentionProduct
+        from t_activity ta
+        left join t_product tp on ta.product_id = tp.id
+        where ta.id = #{actId}
+    </select>
+    <select id="getRecentAddClueId" resultType="java.lang.Integer">
+        SELECT t1.id FROM t_clue t1
+        JOIN (SELECT max(id) as max_id FROM t_clue) t2
+        ON t1.id = t2.max_id;
+    </select>
+
 </mapper>

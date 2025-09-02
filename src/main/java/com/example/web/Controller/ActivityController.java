@@ -99,10 +99,11 @@ public class ActivityController {
         int i=  activityServlet.addTActivity(tActivity);
         if(i>0){
             //情空缓存 应该按照日期降序删第一页缓存
-            redisTemplate.execute((RedisCallback<Object>) connection -> {
-                connection.flushDb();
-                return null;
-            });
+            redisTemplate.delete(REDIS_ACTIVE_Key+1+":10");
+//            redisTemplate.execute((RedisCallback<Object>) connection -> {
+//                connection.flushDb();
+//                return null;
+//            });
         }
 //        return  activityServlet.addTActivity(tActivity);
         return i;

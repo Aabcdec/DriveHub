@@ -16,4 +16,8 @@ public interface TClueServlet {
     void importExcel(InputStream inputStream,int createId);
 
     int deteleByIdClue(@Param("id") Integer id);
+
+    int updataHeader(@Param("fid") Integer fid);
+
+    List<TClue> overdueClueList(@Param("fiownerIdd") Integer ownerId);
 }

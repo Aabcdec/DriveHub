@@ -1,10 +1,9 @@
-package com.example.web.Bean;
+package com.example.web.RabbitMQService.Bean;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.example.web.converter.*;
 import lombok.Data;
-
 
 import java.io.Serializable;
 import java.math.BigDecimal;

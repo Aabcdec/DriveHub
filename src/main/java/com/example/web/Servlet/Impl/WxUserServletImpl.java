@@ -5,7 +5,9 @@ import com.example.web.Mapper.WxUser;
 import com.example.web.Servlet.WxUserServlet;
 import com.example.web.query.WxLogoutQuery;
 import com.example.web.query.cancelSigunData;
+import com.example.web.query.signUpActiveProductQuery;
 import com.example.web.query.signUpDateQuery;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -38,5 +40,20 @@ public class WxUserServletImpl implements WxUserServlet {
     @Override
     public int cancelSigun(cancelSigunData cancel) {
         return wxUser.cancelSigun(cancel);
+    }
+
+    @Override
+    public signUpActiveProductQuery getActJoinProductData(Integer actId) {
+        return wxUser.signUpActiveProductQuery(actId);
+    }
+
+    @Override
+    public int getRecentAddClueId() {
+        return wxUser.getRecentAddClueId();
+    }
+
+    @Override
+    public int byUserIDAndActiveIdDeleteClue(Integer actId, String userId) {
+        return wxUser.byUserIDAndActiveIdDeleteClue(actId,userId);
     }
 }

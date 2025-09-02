@@ -1,6 +1,7 @@
 package com.example.web.Controller;
 
 import com.example.web.Bean.TClue;
+import com.example.web.RabbitMQService.NotificationService;
 import com.example.web.Servlet.TClueServlet;
 import com.example.web.query.TokenWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,9 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -29,42 +28,85 @@ public class TClueController {
     private RedisTemplate redisTemplate;
     private static  final  String REDIS_CLUE_LOCK="redisClueLock";
     private static  final  String REDIS_CLUE_Key="clueKey";
+    //修改跟进
+    @GetMapping("/updataHeader")
+    public int updataHeader(@RequestParam("fid") Integer fid){
+        return tClueServlet.updataHeader(fid);
+    }
     @GetMapping("/threads")
     public List<TClue> getClues(
             @RequestParam("pageNum") Integer pageNum,
             @RequestParam("pageSize") Integer pageSize) {
-        // 1. 尝试获取分布式锁（设置超时时间）
-        RLock lock = redisson.getLock(REDIS_CLUE_LOCK);
-        String cacheKey = String.format(REDIS_CLUE_Key+"%d:%d", pageNum, pageSize);
-        System.out.println(cacheKey);
-        try {
-            boolean lockOk = lock.tryLock(10, 30, TimeUnit.SECONDS); // 等待10秒，锁30秒后自动释放
-            if (!lockOk) {
-                return new ArrayList<>(); // 或抛异常提示系统繁忙
-            }
-            // 2. 查询缓存
-            List<TClue> clueList = (List<TClue>) redisTemplate.opsForValue().get(cacheKey);
-            if (clueList != null) {
-                return clueList; // 缓存命中直接返回
-            }
-            // 3. 缓存未命中，查询数据库
-            List<TClue> clues = tClueServlet.getClues(pageNum, pageSize);
-            // 4. 写入缓存（即使空结果也缓存，避免穿透）
-            redisTemplate.opsForValue().set(
-                    cacheKey,
-                    clues,
-                    30, TimeUnit.MINUTES // 设置过期时间
-            );
-            return clues;
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("获取锁失败", e);
-        } finally {
-            // 5. 确保当前线程持有锁再释放
-            if (lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
-        }
+        List<TClue> clues = tClueServlet.getClues(pageNum, pageSize);
+        return clues;
+//
+//        // 确保缓存键唯一性
+//        String cacheKey = REDIS_CLUE_Key + pageNum + ":" + pageSize;
+//        System.out.println("Cache Key: " + cacheKey);
+//
+//        // 2. 先查询缓存（不需要加锁）
+//        List<TClue> clueList = (List<TClue>) redisTemplate.opsForValue().get(cacheKey);
+//        if (clueList != null) {
+//            return clueList;
+//        }
+//
+//        // 为每个分页创建独立的锁，避免锁竞争
+//        String lockKey = "lock:clue:" + pageNum + ":" + pageSize;
+//        RLock lock = redisson.getLock(lockKey);
+//
+//        try {
+//            // 设置合理的锁超时时间
+//            boolean lockOk = lock.tryLock(2, 10, TimeUnit.SECONDS);
+//            if (!lockOk) {
+//                // 获取锁失败时，可以返回空或尝试其他策略
+//                return tClueServlet.getClues(pageNum, pageSize);
+//            }
+//
+//            // 再次检查缓存（Double Check）
+//            clueList = (List<TClue>) redisTemplate.opsForValue().get(cacheKey);
+//            if (clueList != null) {
+//                return clueList;
+//            }
+//
+//            // 查询数据库
+//            List<TClue> clues = tClueServlet.getClues(pageNum, pageSize);
+//            // 在查询数据库后
+//            if (clues == null || clues.isEmpty()) {
+//                // 缓存空值，设置较短过期时间
+//                redisTemplate.opsForValue().set(
+//                        cacheKey,
+//                        Collections.emptyList(),
+//                        5, TimeUnit.MINUTES // 空结果缓存5分钟
+//                );
+//            } else {
+//                // 正常缓存数据
+//                Random random = new Random();
+//                int expireTime = 25 + random.nextInt(10);
+//                redisTemplate.opsForValue().set(
+//                        cacheKey,
+//                        clues,
+//                        expireTime, TimeUnit.MINUTES
+//                );
+//            }
+//            // 写入缓存，设置随机过期时间避免雪崩
+//            Random random = new Random();
+//            int expireTime = 25 + random.nextInt(10); // 25-35分钟随机
+//            redisTemplate.opsForValue().set(
+//                    cacheKey,
+//                    clues,
+//                    expireTime, TimeUnit.MINUTES
+//            );
+//
+//            return clues;
+//
+//        } catch (InterruptedException e) {
+//            Thread.currentThread().interrupt();
+//            return tClueServlet.getClues(pageNum, pageSize); // 降级策略
+//        } finally {
+//            if (lock.isHeldByCurrentThread()) {
+//                lock.unlock();
+//            }
+//       }
     }
     @PostMapping("/AddThreads")
     public int insertSelective(@RequestBody TClue tClue){
@@ -78,6 +120,23 @@ public class TClueController {
            });
        }
         return i;
+    }
+
+    //预期接口 这里要区分人
+    @Resource
+    private NotificationService notificationService;
+    @GetMapping("/overdueClueList")
+    public List<TClue> overdueClueList(@RequestParam("ownerId") Integer ownerId) {
+        // 只调用一次服务方法
+        List<TClue> tClues = tClueServlet.overdueClueList(ownerId);
+
+        // 存入RabbitMQ
+        tClues.forEach(item -> {
+            notificationService.sendMessage(ownerId, item);
+        });
+
+        // 直接返回已查询的数据，避免重复调用
+        return tClues;
     }
     @PostMapping("/upThreads")
     public int updateByPrimaryKeySelective(@RequestBody TClue tClue) {

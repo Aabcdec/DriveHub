@@ -3,7 +3,9 @@ package com.example.web.Mapper;
 import com.example.web.Bean.User;
 import com.example.web.query.WxLogoutQuery;
 import com.example.web.query.cancelSigunData;
+import com.example.web.query.signUpActiveProductQuery;
 import com.example.web.query.signUpDateQuery;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.apache.ibatis.annotations.Param;
 
 public interface WxUser {
@@ -15,4 +17,9 @@ public interface WxUser {
     int cancelSigun(cancelSigunData cancel);
 
 
+    signUpActiveProductQuery signUpActiveProductQuery(@Param("actId") Integer actId);
+
+    int getRecentAddClueId();
+
+    int byUserIDAndActiveIdDeleteClue(@Param("actId") Integer actId, @Param("userId") String userId);
 }
