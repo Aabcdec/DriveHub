@@ -126,17 +126,17 @@ public class TClueController {
     @Resource
     private NotificationService notificationService;
     @GetMapping("/overdueClueList")
-    public List<TClue> overdueClueList(@RequestParam("ownerId") Integer ownerId) {
+    public String overdueClueList(@RequestParam("ownerId") Integer ownerId) {
+
         // 只调用一次服务方法
         List<TClue> tClues = tClueServlet.overdueClueList(ownerId);
-
+        //实现清除指定队列
+        notificationService.clearUserQueue(ownerId);
         // 存入RabbitMQ
         tClues.forEach(item -> {
             notificationService.sendMessage(ownerId, item);
         });
-
-        // 直接返回已查询的数据，避免重复调用
-        return tClues;
+        return "用户"+ownerId+"管理的逾期数据已全部发完rabbitMQ中";
     }
     @PostMapping("/upThreads")
     public int updateByPrimaryKeySelective(@RequestBody TClue tClue) {

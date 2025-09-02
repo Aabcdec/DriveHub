@@ -1,50 +1,89 @@
 package com.example.web.RabbitMQService;
-import com.example.web.Config.RabbitMQConfig;
+
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.UUID;
 
 @Service
 public class NotificationService {
 
-    @Resource
-    private RabbitMQConfig rabbitMQConfig;
-
-
-    @Resource
+    @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    public void sendMessage(Integer ownerId,Object sendObject){
-        String messageId = UUID.randomUUID().toString();
+    @Autowired
+    private RabbitAdmin rabbitAdmin;
 
-        // 创建消息相关数据
+    // 清空指定用户队列
+    public void clearUserQueue(Integer ownerId) {
+        String queueName = "user.queue.direct." + ownerId;
+        try {
+            rabbitAdmin.purgeQueue(queueName);
+            System.out.println("已清空队列: " + queueName);
+        } catch (Exception e) {
+            System.out.println("清空队列失败（可能队列不存在）: " + queueName);
+        }
+    }
+
+    // 发送消息（自动创建队列和绑定）
+    public void sendMessage(Integer ownerId, Object sendObject) {
+//        // 先清空队列
+//        clearUserQueue(ownerId);
+
+        // 动态创建队列和绑定
+        createUserQueueAndBinding(ownerId);
+
+        // 发送消息
+        String messageId = UUID.randomUUID().toString();
+        String routingKey = "notification.message." + ownerId;
+
         CorrelationData correlationData = new CorrelationData(messageId);
-        //更新rabbitMQ中的路由key
-        //管理员id为1 路由key则应该为notification.message.1
-        rabbitMQConfig.setRouterKey("notification.message."+ownerId);
-        //拿到 最新的路由key
-        String routerKey=rabbitMQConfig.getRouterKey();
-        // 发送对象，并设置消息属性
+
         rabbitTemplate.convertAndSend(
-                rabbitMQConfig.Direct_EXCHANGE_NAME,
-                routerKey,
+                "notification.exchange",
+                routingKey,
                 sendObject,
                 message -> {
-                    //消息默认一天过期 但是只要用户点击了我的待办则会消费 这里应该在用户首页加载的时候往mq中添加消息
-                    //在用户点击我的待办的时候通过websocket连接mq 拿到所有数据同步到vuex 也同步到本地
-                    //防止数据丢失 易于数据恢复 这里并没有在mq中做防重 前端通过websocket每次拿到数据可以自行进行去重复
                     message.getMessageProperties().setExpiration("86400000");
                     message.getMessageProperties().setMessageId(messageId);
+                    message.getMessageProperties().setHeader("ownerId", ownerId);
                     return message;
                 },
                 correlationData
         );
+
+        System.out.println("消息已发送到用户 " + ownerId + " 的队列");
     }
 
+    // 动态创建队列和绑定
+    private void createUserQueueAndBinding(Integer ownerId) {
+        String queueName = "user.queue.direct." + ownerId;
+        String routingKey = "notification.message." + ownerId;
+
+        try {
+            // 创建队列
+            Queue queue = new Queue(queueName, true, false, false);
+            rabbitAdmin.declareQueue(queue);
+
+            // 创建绑定
+            Binding binding = BindingBuilder.bind(queue)
+                    .to(new DirectExchange("notification.exchange"))
+                    .with(routingKey);
+            rabbitAdmin.declareBinding(binding);
+
+            System.out.println("已创建队列和绑定: " + queueName);
+
+        } catch (Exception e) {
+            System.out.println("创建队列和绑定失败: " + e.getMessage());
+        }
+    }
+
+    // 单独的方法：只删除队列数据（不清空队列）
+    public void deleteQueueData(Integer ownerId) {
+        clearUserQueue(ownerId);
+    }
 }
