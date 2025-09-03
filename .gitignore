@@ -19,6 +19,10 @@ target/
 *.iml
 *.ipr
 
+### 忽略包含敏感信息的配置文件 ###
+application-secret.properties
+*.secret
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
