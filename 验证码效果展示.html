@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证码效果展示</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .demo-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #f9f9f9;
+        }
+        
+        .demo-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #555;
+        }
+        
+        .captcha-demo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .captcha-code {
+            display: inline-block;
+            width: 80px;
+            height: 32px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(3px);
+        }
+        
+        .captcha-code:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .captcha-code canvas {
+            border-radius: 3px;
+            display: block;
+        }
+        
+        .refresh-btn {
+            padding: 6px 12px;
+            background: #409EFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .refresh-btn:hover {
+            background: #66b1ff;
+        }
+        
+        .input-demo {
+            width: 150px;
+            padding: 8px;
+            border: 1px solid #dcdfe6;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .feature-item {
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #409EFF;
+        }
+        
+        .feature-title {
+            font-weight: bold;
+            color: #409EFF;
+            margin-bottom: 8px;
+        }
+        
+        .feature-desc {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .access-info {
+            background: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .access-title {
+            font-weight: bold;
+            color: #1890ff;
+            margin-bottom: 10px;
+        }
+        
+        .access-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .access-link {
+            color: #1890ff;
+            text-decoration: none;
+            padding: 5px 10px;
+            border: 1px solid #1890ff;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .access-link:hover {
+            background: #1890ff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 登录验证码功能展示</h1>
+        
+        <div class="demo-section">
+            <div class="demo-title">验证码效果演示</div>
+            <div class="captcha-demo">
+                <input type="text" class="input-demo" placeholder="请输入验证码" maxlength="3">
+                <div class="captcha-code" onclick="refreshDemo()">
+                    <canvas id="demoCanvas" width="80" height="32"></canvas>
+                </div>
+                <button class="refresh-btn" onclick="refreshDemo()">刷新</button>
+            </div>
+            <p style="color: #666; font-size: 14px;">
+                💡 点击验证码或刷新按钮可以生成新的验证码
+            </p>
+        </div>
+        
+        <div class="demo-section">
+            <div class="demo-title">功能特性</div>
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-title">🎨 Canvas绘制</div>
+                    <div class="feature-desc">使用HTML5 Canvas绘制，支持复杂的视觉效果和动画</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">🌈 随机干扰</div>
+                    <div class="feature-desc">包含随机干扰线、干扰点，增加机器识别难度</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">🔄 字符变形</div>
+                    <div class="feature-desc">字符随机旋转、位置偏移、颜色变化</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">💎 透明背景</div>
+                    <div class="feature-desc">半透明背景设计，与页面背景完美融合</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">🔒 安全性高</div>
+                    <div class="feature-desc">多重干扰机制，有效防止自动化攻击</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-title">✨ 用户友好</div>
+                    <div class="feature-desc">大小写不敏感，多种刷新方式，操作便捷</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="access-info">
+            <div class="access-title">🌐 访问应用</div>
+            <p style="margin: 10px 0; color: #666;">
+                验证码功能已集成到登录页面，您可以通过以下链接访问完整应用：
+            </p>
+            <div class="access-links">
+                <a href="http://localhost:8080/" class="access-link" target="_blank">本地访问</a>
+                <a href="http://172.25.219.212:8080/" class="access-link" target="_blank">网络访问</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCode = '';
+        
+        function generateCaptcha() {
+            const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+            let result = '';
+            for (let i = 0; i < 3; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            currentCode = result;
+            drawCaptcha();
+        }
+        
+        function drawCaptcha() {
+            const canvas = document.getElementById('demoCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // 清空画布
+            ctx.clearRect(0, 0, width, height);
+            
+            // 设置背景（更加透明）
+            ctx.fillStyle = 'rgba(240, 240, 240, 0.1)';
+            ctx.fillRect(0, 0, width, height);
+            
+            // 绘制验证码文字
+            ctx.font = 'bold 18px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 为每个字符设置随机颜色和位置
+            for (let i = 0; i < currentCode.length; i++) {
+                const char = currentCode[i];
+                const x = (width / 4) * (i + 1);
+                const y = height / 2 + (Math.random() - 0.5) * 6; // 随机Y偏移
+                
+                // 随机颜色
+                const colors = ['#333', '#666', '#999', '#444', '#555'];
+                ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
+                
+                // 随机旋转
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate((Math.random() - 0.5) * 0.3); // 随机旋转角度
+                ctx.fillText(char, 0, 0);
+                ctx.restore();
+            }
+            
+            // 绘制干扰线（3条）
+            for (let i = 0; i < 3; i++) {
+                ctx.strokeStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`;
+                ctx.lineWidth = Math.random() * 2 + 0.5; // 随机线宽
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * width, Math.random() * height);
+                ctx.lineTo(Math.random() * width, Math.random() * height);
+                ctx.stroke();
+            }
+            
+            // 绘制干扰点
+            for (let i = 0; i < 20; i++) {
+                ctx.fillStyle = `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.4)`;
+                ctx.beginPath();
+                ctx.arc(Math.random() * width, Math.random() * height, 1, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+        
+        function refreshDemo() {
+            generateCaptcha();
+            document.querySelector('.input-demo').value = '';
+        }
+        
+        // 页面加载时生成第一个验证码
+        window.onload = function() {
+            generateCaptcha();
+        };
+    </script>
+</body>
+</html>
