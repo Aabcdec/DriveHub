@@ -15,7 +15,8 @@ import Back from './components/back/index.vue'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import DetailTable from './components/DetailTable/index.vue'
-
+import FollowManagement from './components/FollowManagement/index.vue'
+import ClueDetailRecord  from './components/ClueDetailRecord/index.vue'
 const app = createApp(App)
 // 注册 ElementPlus 组件
 app.use(ElementPlus, {
@@ -31,5 +32,7 @@ app.component('EditPen', EditPen)
 app.component('Setting', Setting)
 app.component('DetailTable',DetailTable)
 app.component('Back', Back)
+app.component("FollowManagement",FollowManagement)
+app.component('ClueDetailRecord',ClueDetailRecord)
 app.mount('#app')
 

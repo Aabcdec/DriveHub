@@ -392,7 +392,7 @@ export default {
         return
       }
 
-      this.socket = new WebSocket('ws://localhost:8088/ws/rabbitmq')
+      this.socket = new WebSocket('ws://localhost:8080/ws/rabbitmq')
 
       this.socket.onopen = () => {
         console.log('✅ WebSocket连接已建立')

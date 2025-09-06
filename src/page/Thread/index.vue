@@ -6,7 +6,8 @@
         <h2>线索管理</h2>
         <p>管理销售线索，跟踪客户意向和转化情况</p>
       </div>
-      <el-button type="success" @click="importExcel" class="excelBtn" :disabled="ButtonList.indexOf('import') === -1">导入线索(Excel)</el-button>
+      <el-button type="success" @click="importExcel" class="excelBtn"
+        :disabled="ButtonList.indexOf('import') === -1">导入线索(Excel)</el-button>
       <el-button type="primary" @click="addThread" :disabled="ButtonList.indexOf('add') === -1">
         <el-icon>
           <Plus />
@@ -56,7 +57,7 @@
 
     <!-- 线索列表 -->
     <el-card>
-      <el-table :data="threads" style="width: 100%;height: 500px;" v-loading="loading"  sticky-header>
+      <el-table :data="threads" style="width: 100%;height: 500px;" v-loading="loading" sticky-header>
         <el-table-column prop="fullName" label="客户名称" width="150" />
         <el-table-column prop="activityDO.name" label="所属活动" width="150" />
         <el-table-column prop="appellationDO.typeValue" label="称呼" width="150" />
@@ -98,8 +99,10 @@
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="scope">
             <el-button size="small" @click="viewThread(scope.row)">查看</el-button>
-            <el-button size="small" type="primary" @click="editThread(scope.row)" :disabled="scope.row.state==-1">编辑</el-button>
-            <el-button size="small" type="success" @click="followThread(scope.row)" :disabled="scope.row.state==-1">跟进</el-button>
+            <el-button size="small" type="primary" @click="editThread(scope.row)"
+              :disabled="scope.row.state == -1">编辑</el-button>
+            <el-button size="small" type="success" @click="followThread(scope.row)"
+              :disabled="scope.row.state == -1">跟进</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -201,252 +204,13 @@
       </template>
     </el-dialog>
     <!-- 详情线索对话框 -->
-    <el-dialog v-model="showDetailDialog" title="线索详情记录" width="800px" :close-on-click-modal="true">
-      <div class="detail-container">
-        <!-- 线索基本信息 -->
-        <div class="thread-info-header">
-          <h3>{{ currentThread.fullName || '未知客户' }} - 详情记录</h3>
-          <el-tag type="primary">线索ID: {{ currentThread.id }}</el-tag>
-        </div>
-        <!-- 这里打印用户详情 -->
-        <el-card>
-          <el-table :data="detailThreads" style="width: 100%" v-loading="loading">
-            <el-table-column prop="fullName" label="客户名称" width="150" />
-            <el-table-column prop="activityDO.name" label="所属活动" width="150" />
-            <el-table-column prop="appellationDO.typeValue" label="称呼" width="150" />
+    <!-- 替换原有的详情线索对话框 -->
+    <ClueDetailRecord v-model:visible="showDetailDialog" :thread-data="currentThread"
+      :can-delete="ButtonList.indexOf('delete') !== -1" @convert-customer="handleConvertCustomer"
+      @delete-thread="handleDeleteThread" />
 
-            <el-table-column prop="age" label="年龄" width="100" />
-            <el-table-column prop="job" label="职业" width="100" />
-            <el-table-column prop="description" label="详情描述" width="100" />
-            <el-table-column prop="address" label="地址" width="150" />
-            <el-table-column prop="yearIncome" label="年收入" width="100" />
-            <el-table-column prop="intentionProductDO.name" label="意向产品" width="100" />
-
-            <el-table-column prop="needLoanDO.typeValue" label="是否需要贷款" width="150" />
-
-            <el-table-column prop="phone" label="联系电话" width="130" />
-            <el-table-column prop="email" label="邮箱" width="180" />
-            <el-table-column prop="source" label="线索来源" width="120">
-              <template #default="scope">
-                <el-tag type="success">
-                  {{ getSourceLabel(scope.row.source) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            
-            <el-table-column prop="createTime" label="创建时间" width="150" />
-            <el-table-column prop="nextContactTime" label="最后跟进" width="150" />
-            <el-table-column prop="state" label="状态" width="100" fixed="right">
-              <template #default="scope">
-                <el-tag :type="getStatusType(scope.row.state)">
-                  {{ getStatusLabel(scope.row.state) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="createBy" label="负责人" width="100" fixed="right">
-              <template #default="scope">
-                <el-tag type="primary">
-                  {{ getCreateBy(scope.row.createBy) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-card>
-        <div v-if="followRecords && followRecords.length > 0" class="detail-content">
-          <el-table :data="followRecords" style="width: 100%" stripe size="small" v-loading="followLoading"
-            element-loading-text="加载跟进记录中...">
-            <el-table-column prop="id" label="ID" width="50" />
-            <el-table-column prop="followType" label="跟进方式" width="80">
-              <template #default="scope">
-                <el-tag :type="getFollowTypeColor(scope.row.followType)" size="small">
-                  {{ getFollowTypeLabel(scope.row.followType) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="followText" label="跟进内容" min-width="200" show-overflow-tooltip />
-            <el-table-column prop="followState" label="跟进结果" width="80">
-              <template #default="scope">
-                <el-tag :type="getFollowResultColor(scope.row.followState)" size="small">
-                  {{ getFollowResultLabel(scope.row.followState) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="nextTime" label="下次跟进时间" width="150">
-              <template #default="scope">
-                <span v-if="scope.row.nextTime">{{ formatDateTime(scope.row.nextTime) }}</span>
-                <span v-else>-</span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="createTime" label="创建时间" width="150">
-              <template #default="scope">
-                <span>{{ formatDateTime(scope.row.createTime) }}</span>
-              </template>
-            </el-table-column>
-            <el-table-column prop="createBy" label="跟进人" width="80">
-              <template #default="scope">
-                <span>{{ getUserDisplayName(scope.row.createBy) }}</span>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-
-        <!-- 无数据提示 -->
-        <div v-else class="no-data">
-          <el-empty description="暂无详情记录" />
-        </div>
-      </div>
-
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button
-            @click="converterUser"
-            type="success"
-            :disabled="ableCustomer"
-            :title="ableCustomer ? '该线索状态不允许转为客户' : '转为客户'"
-          >
-            转为用户
-          </el-button>
-          <el-button @click="hideDetailDialog">关闭</el-button>
-          <el-button @click="deleteThread" type="danger" :disabled="ButtonList.indexOf('delete') === -1">删除</el-button>
-        </div>
-      </template>
-    </el-dialog>
-
-    <!-- 跟进记录对话框 -->
-    <el-dialog v-model="showFollowDialog" title="跟进记录管理" width="900px" :close-on-click-modal="false">
-      <div class="follow-container">
-        <!-- 线索基本信息 -->
-        <div class="follow-info-header">
-          <h3>{{ currentFollowThread.fullName ? currentFollowThread.fullName : '未知客户' }} - 跟进记录</h3>
-          <el-tag type="primary">线索ID: {{ currentFollowThread.id }}</el-tag>
-        </div>
-
-        <!-- 跟进记录列表 -->
-        <el-card class="follow-records-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span>历史跟进记录</span>
-              <el-button type="primary" size="small" @click="addNewFollow">
-                <el-icon>
-                  <Plus />
-                </el-icon>
-                新增跟进
-              </el-button>
-            </div>
-          </template>
-
-          <div v-if="followRecords && followRecords.length > 0" class="follow-content">
-            <el-table :data="followRecords" style="width: 100%" stripe size="small" v-loading="followLoading"
-              element-loading-text="加载跟进记录中...">
-              <el-table-column prop="id" label="ID" width="50" />
-              <el-table-column prop="followType" label="跟进方式" width="80">
-                <template #default="scope">
-                  <el-tag :type="getFollowTypeColor(scope.row.followType)" size="small">
-                    {{ getFollowTypeLabel(scope.row.followType) }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column prop="followText" label="跟进内容" min-width="200" show-overflow-tooltip />
-              <el-table-column prop="followState" label="跟进结果" width="80">
-                <template #default="scope">
-                  <el-tag :type="getFollowResultColor(scope.row.followState)" size="small">
-                    {{ getFollowResultLabel(scope.row.followState) }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column prop="nextTime" label="下次跟进时间" width="150">
-                <template #default="scope">
-                  <span v-if="scope.row.nextTime">{{ formatDateTime(scope.row.nextTime) }}</span>
-                  <span v-else>-</span>
-                </template>
-              </el-table-column>
-              <el-table-column prop="createTime" label="创建时间" width="150">
-                <template #default="scope">
-                  <span>{{ formatDateTime(scope.row.createTime) }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column prop="createBy" label="跟进人" width="80">
-                <template #default="scope">
-                  <span>{{ getUserDisplayName(scope.row.createBy) }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="操作" width="200" fixed="right">
-                <template #default="scope">
-                  <el-button size="small" type="primary" @click="editFollow(scope.row)" :disabled="ButtonList.indexOf('edit') === -1">编辑</el-button>
-                  <el-button size="small" type="danger" @click="deleFollow(scope.row)" :disabled="ButtonList.indexOf('delete') === -1">删除</el-button>
-
-                </template>
-              </el-table-column>
-            </el-table>
-          </div>
-
-          <!-- 无数据提示 -->
-          <div v-else class="no-follow-data">
-            <el-empty description="暂无跟进记录" />
-          </div>
-        </el-card>
-
-        <!-- 新增跟进表单 -->
-        <el-card v-if="showAddFollowForm" class="add-follow-card" shadow="never">
-          <template #header>
-            <div class="card-header">
-              <span>{{ editingFollow ? '编辑跟进记录' : '新增跟进记录' }}</span>
-              <el-button size="small" @click="cancelAddFollow">取消</el-button>
-            </div>
-          </template>
-
-          <el-form :model="followForm" :rules="followRules" ref="followFormRef" label-width="100px" size="small">
-            <el-row :gutter="20">
-              <el-col :span="12">
-                <el-form-item label="跟进方式" prop="type">
-                  <el-select v-model="followForm.type" placeholder="请选择跟进方式">
-                    <el-option label="电话" value="phone" />
-                    <el-option label="邮件" value="email" />
-                    <el-option label="微信" value="wechat" />
-                    <el-option label="面谈" value="meeting" />
-                    <el-option label="其他" value="other" />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-              <el-col :span="12">
-                <el-form-item label="跟进结果" prop="result">
-                  <el-select v-model="followForm.result" placeholder="请选择跟进结果">
-                    <el-option label="成功" value=1 />
-                    <el-option label="失败" value=2 />
-                    <el-option label="待跟进" value=3 />
-                    <el-option label="已完成" value=4 />
-                  </el-select>
-                </el-form-item>
-              </el-col>
-            </el-row>
-            <el-form-item label="跟进内容" prop="content">
-              <el-input v-model="followForm.content" type="textarea" :rows="3" placeholder="请输入跟进内容" />
-            </el-form-item>
-            <el-form-item label="下次跟进时间" prop="nextFollowTime">
-              <el-date-picker v-model="followForm.nextFollowTime" type="datetime" placeholder="选择下次跟进时间"
-                format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="saveFollow" :loading="followSaving" :disabled="followSaving">
-                {{ followSaving ? '保存中...' : (editingFollow ? '更新跟进记录' : '保存跟进记录') }}
-              </el-button>
-              <el-button @click="cancelAddFollow" :disabled="followSaving">取消</el-button>
-            </el-form-item>
-          </el-form>
-        </el-card>
-      </div>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="closeFollowDialog">关闭</el-button>
-          <el-button type="primary" @click="refreshFollowRecords">
-            <el-icon>
-              <Refresh />
-            </el-icon>
-            刷新记录
-          </el-button>
-        </div>
-      </template>
-    </el-dialog>
+    <!-- 替换原有的跟进记录对话框 -->
+    <FollowManagement v-model:visible="showFollowDialog" :thread-data="currentFollowThread" />
     <el-dialog v-model="importExcelDialogVisible" title="导入线索Excel" width="55%" center draggable>
       <el-upload ref="uploadRef" method="post" :http-request="uploadFile" :auto-upload="false">
 
@@ -476,34 +240,26 @@
         </span>
       </template>
     </el-dialog>
-    
-  <!--线索转换为客户的弹窗（对话框）-->
-  <el-dialog v-model="convertCustomerDialogVisible" title="线索转换客户" width="55%" center>
-    <el-form ref="convertCustomerRefForm" :model="customerQuery" label-width="110px" :rules="convertCustomerRules">
-     
-      <el-form-item label="客户描述" prop="description">
-        <el-input
-            v-model="customerQuery.description"
-            :rows="8"
-            type="textarea"
-            placeholder="请输入客户描述"/>
-      </el-form-item>
-      <el-form-item label="下次跟踪时间" prop="nextContactTime">
-        <el-date-picker
-            v-model="customerQuery.nextContactTime"
-            type="datetime"
-            style="width: 100%;"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="请选择下次跟踪时间"/>
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <span class="dialog-footer">
-        <el-button @click="stopConvertCustomer">关 闭</el-button>
-        <el-button type="primary" @click="convertCustomerSubmit">转 换</el-button>
-      </span>
-    </template>
-  </el-dialog>
+
+    <!--线索转换为客户的弹窗（对话框）-->
+    <el-dialog v-model="convertCustomerDialogVisible" title="线索转换客户" width="55%" center>
+      <el-form ref="convertCustomerRefForm" :model="customerQuery" label-width="110px" :rules="convertCustomerRules">
+
+        <el-form-item label="客户描述" prop="description">
+          <el-input v-model="customerQuery.description" :rows="8" type="textarea" placeholder="请输入客户描述" />
+        </el-form-item>
+        <el-form-item label="下次跟踪时间" prop="nextContactTime">
+          <el-date-picker v-model="customerQuery.nextContactTime" type="datetime" style="width: 100%;"
+            value-format="YYYY-MM-DD HH:mm:ss" placeholder="请选择下次跟踪时间" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="stopConvertCustomer">关 闭</el-button>
+          <el-button type="primary" @click="convertCustomerSubmit">转 换</el-button>
+        </span>
+      </template>
+    </el-dialog>
 
   </div>
 </template>
@@ -519,6 +275,7 @@ import { doGet, doPost, doPut } from '../../http/httpRequest.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Refresh } from '@element-plus/icons-vue'
 
+
 export default {
   name: 'ThreadIndex',
   components: {
@@ -528,9 +285,9 @@ export default {
   data() {
     return {
       //按钮权限
-      ButtonList:[],
+      ButtonList: [],
       //市场活动的下拉选项数据，初始值是空
-      ableCustomer:false,//控制转换按钮的禁用于可用
+      ableCustomer: false,//控制转换按钮的禁用于可用
       activityOptions: [{}],
       //意向产品的下拉选项
       productOptions: [{}],
@@ -540,19 +297,19 @@ export default {
       clueStateOptions: [{}],
       sourceOptions: [{}],
       importExcelDialogVisible: false, //Excel导入弹窗
-      convertCustomerDialogVisible:false,
+      convertCustomerDialogVisible: false,
       //线索转换为客户的form表单对象，初始值是空
-      customerQuery : {},
+      customerQuery: {},
       //定义线索转换为客户的验证规则
-      convertCustomerRules : {
-        product : [
+      convertCustomerRules: {
+        product: [
           { required: true, message: '请选择意向产品', trigger: ['blur', 'change'] }
         ],
-        description : [
+        description: [
           { required: true, message: '客户描述不能为空', trigger: 'blur' },
           { min: 5, max: 255, message: '客户描述长度为5-255个字符', trigger: 'blur' }
         ],
-        nextContactTime : [
+        nextContactTime: [
           { required: true, message: '请选择下次联系时间', trigger: 'blur' }
         ]
       },
@@ -704,12 +461,12 @@ export default {
     },
 
     //关闭用户转换弹窗
-    stopConvertCustomer(){
+    stopConvertCustomer() {
       this.convertCustomerDialogVisible = false;
       this.customerQuery = {};
     },
     //用户转换
-    convertCustomerSubmit(){
+    convertCustomerSubmit() {
       this.$refs.convertCustomerRefForm.validate((valid) => {
         if (valid) {
           //表单验证通过
@@ -734,12 +491,12 @@ export default {
             console.error('转换失败:', err)
             ElMessage.error('转换失败')
 
-        })
-      }
-    })
+          })
+        }
+      })
     },
     //转为打开用户转换弹窗
-    converterUser(){
+    converterUser() {
       this.convertCustomerDialogVisible = true;
     },
     //编辑跟进信息
@@ -754,17 +511,17 @@ export default {
     },
     deleteThread() {
       //用户id也是fId 拿到删除俩个
-     const request1= doGet("/api/deleteByIdClue", { id: this.detailThreads[0].id,currentPage:this.currentPage });
-     const request2= doGet("/api/deleteByIdFollow", { fId: this.detailThreads[0].id });
+      const request1 = doGet("/api/deleteByIdClue", { id: this.detailThreads[0].id, currentPage: this.currentPage });
+      const request2 = doGet("/api/deleteByIdFollow", { fId: this.detailThreads[0].id });
       console.log(this.detailThreads[0].id);
       // 使用 axios.all 并行处理多个请求
       axios.all([request1, request2])
         .then(axios.spread((response1, response2) => {
           // 当两个请求都成功时执行
-         ElMessage.success("删除成功");
-         this.showDetailDialog = false;//关闭弹框
-         this.loadThreads();//刷新clue
-         this.refreshFollowRecords();//刷新跟进记录
+          ElMessage.success("删除成功");
+          this.showDetailDialog = false;//关闭弹框
+          this.loadThreads();//刷新clue
+          this.refreshFollowRecords();//刷新跟进记录
           // 返回合并后的结果或执行其他操作
           return {
             data1: response1.data,
@@ -872,7 +629,7 @@ export default {
               console.log('管理员模式：显示所有线索数据，总数:', this.total)
             } else {
               // 普通用户只能看到自己的数据
-             
+
               this.total = res.data.length
               console.log('普通用户模式：只显示自己的线索数据，总数:', this.total)
 
@@ -893,7 +650,7 @@ export default {
     searchThreads() {
       // 权限检查：普通用户只能搜索自己的数据
       if (this.currentUserRole !== 'admin' && this.searchForm.createBy &&
-          this.searchForm.createBy.toString() !== this.currentUserId.toString()) {
+        this.searchForm.createBy.toString() !== this.currentUserId.toString()) {
         ElMessage.warning('您只能查询自己的数据')
         return
       }
@@ -1430,16 +1187,16 @@ export default {
         3: '车展会',
         14: '汽车之家',
         16: '网络广告',
-        17:'视频直播',
-        22:'地图',
-        23:'合作伙伴',
-        25:'朋友圈',
-        33:'懂车帝',
-        36:'易车网',
-        39:'员工介绍',
-        43:'官方网站',
-        44:'公众号',
-        45:'门店参观'
+        17: '视频直播',
+        22: '地图',
+        23: '合作伙伴',
+        25: '朋友圈',
+        33: '懂车帝',
+        36: '易车网',
+        39: '员工介绍',
+        43: '官方网站',
+        44: '公众号',
+        45: '门店参观'
       }
       return labels[source] || source
     },
@@ -1451,7 +1208,7 @@ export default {
         2: 'primary',
         3: 'success',
         4: 'info',
-       '-1': ''
+        '-1': ''
       }
       return types[status] || 'info'
     },
@@ -1460,13 +1217,13 @@ export default {
     getStatusLabel(status) {
       const labels = {
         '-1': '已转换为客户',
-        1:'虚假线索',
-        6:'将来线索',
-        7:'丢失线索',
-        10:'试图联系',
-        24:'未联系',
-        27:'已联系',
-        30:'需要条件'
+        1: '虚假线索',
+        6: '将来线索',
+        7: '丢失线索',
+        10: '试图联系',
+        24: '未联系',
+        27: '已联系',
+        30: '需要条件'
       }
       return labels[status] || status
     },
