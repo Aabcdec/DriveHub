@@ -568,7 +568,7 @@ export default {
       userInfo: null, // 初始值可以是 null 或默认对象
       //详情表单
       detail: [],
-
+       socket: null,
       // 详情记录分页
       detailCurrentPage: 1,
       detailPageSize: 10,
@@ -1394,10 +1394,12 @@ export default {
                 let ownerId = localStorage.getItem('USERID'); 
                 this.$router.push("/thread");
                 //通过springBoot拿到rabbitMQ中的数据 获取最新的数据
+                this.$store.commit('CLEAR_DATA')
                 this.$getMessages();
                 //如果这里能调用
                 this.dialogVisible=true;
                 //拿到最新的数据更新待办
+                this.$disconnect()//先关闭连接在建立连接
                 this.$connectWebSocket('user.queue.direct.' + ownerId)
               }
               console.log(res)

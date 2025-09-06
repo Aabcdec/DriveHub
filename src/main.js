@@ -9,6 +9,7 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import Captcha from './components/Captcha'
 import router from './router'
+import store from './store/index.js'
 import { EditPen, Setting } from '@element-plus/icons-vue'
 import Back from './components/back/index.vue'
 // 引入 ElementPlus 图标
@@ -29,50 +30,106 @@ app.config.globalProperties.$getMessages = function () {
 app.config.globalProperties.$clearMessage = function () {
     this.messages = [];
 }
-app.config.globalProperties.$connectWebSocket=function(queueName){
-if (!queueName) {
-        alert('请输入队列名称')
-        return
+// app.config.globalProperties.$connectWebSocket=function(queueName){
+// if (!queueName) {
+//         alert('请输入队列名称')
+//         return
+//       }
+       
+//       this.socket = new WebSocket('ws://localhost:8080/ws/rabbitmq')
+
+//       this.socket.onopen = () => {
+//         console.log('✅ WebSocket连接已建立')
+//         this.socket.send(queueName)
+//       }
+
+//       this.socket.onmessage = event => {
+//         try {
+//           const data = JSON.parse(event.data)
+//           console.log('📨 收到JSON消息:', data)
+
+//           if (data && data.id) {
+//               this.$store.commit('ADD_MESSAGE', data)
+//           } else {
+//             console.log('📨 收到无ID消息:', data)
+//           }
+//         } catch (error) {
+//           // 如果不是JSON格式，直接处理字符串
+//           console.log('📨 收到文本消息:', event.data)
+
+//           // 如果需要，你也可以处理这些文本消息
+//           if (event.data.includes('开始获取队列') || event.data.includes('完成')) {
+//             console.log('ℹ️ 系统状态消息:', event.data)
+//           }
+//         }
+//       }
+
+//       this.socket.onclose = event => {
+//         console.log('❌ 连接已关闭', event.code, event.reason)
+//       }
+
+//       this.socket.onerror = error => {
+//         console.log('💥 WebSocket错误:', error)
+//         // 显示错误信息到页面
+//       }
+// }
+app.config.globalProperties.$connectWebSocket = function(queueName) {
+  if (!queueName) {
+    alert('请输入队列名称')
+    return
+  }
+
+  // 单例模式：如果已存在连接，先关闭
+  if (this._websocketInstance) {
+    this._websocketInstance.close()
+  }
+
+  const socket = new WebSocket('ws://localhost:8080/ws/rabbitmq')
+  this._websocketInstance = socket
+
+  // 保存当前实例的引用
+  const vm = this
+
+  socket.onopen = () => {
+    console.log('✅ WebSocket连接已建立')
+    socket.send(queueName)
+  }
+
+  socket.onmessage = event => {
+    try {
+      const data = JSON.parse(event.data)
+      console.log('📨 收到JSON消息:', data)
+
+      if (data && data.id) {
+        // 使用保存的实例引用
+        vm.$store.commit('ADD_MESSAGE', data)
+      } else {
+        console.log('📨 收到无ID消息:', data)
       }
-      this.socket = new WebSocket('ws://localhost:8080/ws/rabbitmq')
+    } catch (error) {
+      console.log('📨 收到文本消息:', event.data)
+    }
+  }
 
-      this.socket.onopen = () => {
-        console.log('✅ WebSocket连接已建立')
-        this.socket.send(queueName)
-      }
+  socket.onclose = event => {
+    console.log('❌ 连接已关闭', event.code, event.reason)
+    // 清理实例引用
+    if (this._websocketInstance === socket) {
+      this._websocketInstance = null
+    }
+  }
 
-      this.socket.onmessage = event => {
-        try {
-          const data = JSON.parse(event.data)
-          console.log('📨 收到JSON消息:', data)
-
-          if (data && data.id) {
-            this.messages.push(data)
-          } else {
-            console.log('📨 收到无ID消息:', data)
-          }
-        } catch (error) {
-          // 如果不是JSON格式，直接处理字符串
-          console.log('📨 收到文本消息:', event.data)
-
-          // 如果需要，你也可以处理这些文本消息
-          if (event.data.includes('开始获取队列') || event.data.includes('完成')) {
-            console.log('ℹ️ 系统状态消息:', event.data)
-          }
-        }
-      }
-
-      this.socket.onclose = event => {
-        console.log('❌ 连接已关闭', event.code, event.reason)
-      }
-
-      this.socket.onerror = error => {
-        console.log('💥 WebSocket错误:', error)
-        // 显示错误信息到页面
+  socket.onerror = error => {
+    console.log('💥 WebSocket错误:', error)
+  }
+}
+app.config.globalProperties.$disconnect=function(){
+    if (this.socket) {
+        this.socket.close()
+        this.socket = null
       }
 }
 
- 
 
 // 注册 ElementPlus 组件
 app.use(ElementPlus, {
@@ -83,6 +140,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
 }
 app.use(router)
+app.use(store)
 app.component('Captcha', Captcha)
 app.component('EditPen', EditPen)
 app.component('Setting', Setting)

@@ -263,7 +263,7 @@ export default {
       dialogVisible: false, //我的待办对话框
       overdueClueList: [], //逾期数据
       socket: null,
-      messages: []
+      messages: this.$store.state.messages
     }
   },
   computed: {
@@ -332,7 +332,7 @@ export default {
     }
   },
   beforeUnmount() {
-    this.disconnect()
+    this.$disconnect()
   },
   methods: {
     getAppellationLabel(){
@@ -460,12 +460,12 @@ export default {
     //   }
     // },
 
-    disconnect() {
-      if (this.socket) {
-        this.socket.close()
-        this.socket = null
-      }
-    },
+    // disconnect() {
+    //   if (this.socket) {
+    //     this.socket.close()
+    //     this.socket = null
+    //   }
+    // },
 
     // 修改密码
     changePassword() {
