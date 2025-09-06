@@ -75,7 +75,7 @@
 
       <!-- 中间 -->
       <el-main>
-        <router-view v-if="isActive"></router-view>
+        <router-view v-if="isActive" ></router-view>
         <el-dialog
           v-model="dialogVisible"
           title="我的待办"
@@ -205,7 +205,7 @@
                   size="small"
                   type="success"
                   @click="followThread(scope.row)"
-                  :disabled="scope.row.state === -1"
+                  :disabled="scope.row.state == -1"
                 >跟进</el-button>
               </template>
             </el-table-column>
@@ -283,7 +283,8 @@ export default {
   created() {
     console.log(menuRule[0].admin)
     //在页面加载的时候拿到mq中的数据
-    this.getMessages()
+    this.$getMessages();
+    this.__proto__
     let id = JSON.parse(localStorage.getItem('TOKEN')).value.id
     doGet('/api/byIdClue', { id: id }).then(res => {
       // res.data.role
@@ -345,19 +346,24 @@ export default {
       }
       return labels[status] || status
     },
-    getMessages() {
-      let ownerId = localStorage.getItem('USERID')
-      //通过springBoot拿到rabbitMQ中的数据
-      doGet('/api/overdueClueList', { ownerId }).then(res => {
-        console.log(res)
-      })
-    },
+    // getMessages() {
+    //   let ownerId = localStorage.getItem('USERID')
+    //   //通过springBoot拿到rabbitMQ中的数据
+    //   doGet('/api/overdueClueList', { ownerId }).then(res => {
+    //     console.log(res)
+    //   })
+    // },
+    // clearMessage(){
+    //   this.messages=[];
+    // },
     handleClose(done) {
       ElMessageBox.confirm('Are you sure to close this dialog?')
         .then(() => {
           done()
+          this.$router.push('/thread')
         })
         .catch(() => {
+          
           // 用户取消关闭操作
           // 这里不需要调用 done()，对话框会保持打开状态
         })
@@ -375,7 +381,31 @@ export default {
         console.log(res)
       })
     },
-
+      // 查看线索
+  viewThread(row) {
+    // 通过路由跳转到线索页并传递参数
+    this.$router.push({
+      path: '/thread',
+      query: {
+        action: 'view',
+        threadId: row.id,
+        thread:JSON.stringify(row)
+      }
+    })
+  },
+  
+  // 跟进线索
+  followThread(row) {
+    // 通过路由跳转到线索页并传递参数
+    this.$router.push({
+      path: '/thread',
+      query: {
+        action: 'follow',
+        threadId: row.id,
+        thread:JSON.stringify(row)
+      }
+    })
+  },
     // 查看我的待办
     viewProfile() {
       //在这里拼接队列名
@@ -383,52 +413,52 @@ export default {
       this.dialogVisible = true
       //这里应该通过websocket连接rabbitmq 拿到数据同步到vuex和本地 存储在本地是为了数据恢复
       // ElMessage.info('个人资料功能开发中...')
-      this.connectWebSocket('user.queue.direct.' + userId)
+      this.$connectWebSocket('user.queue.direct.' + userId)
       console.log(this.messages)
     },
-    connectWebSocket(queueName) {
-      if (!queueName) {
-        alert('请输入队列名称')
-        return
-      }
+    // connectWebSocket(queueName) {
+    //   if (!queueName) {
+    //     alert('请输入队列名称')
+    //     return
+    //   }
 
-      this.socket = new WebSocket('ws://localhost:8080/ws/rabbitmq')
+    //   this.socket = new WebSocket('ws://localhost:8080/ws/rabbitmq')
 
-      this.socket.onopen = () => {
-        console.log('✅ WebSocket连接已建立')
-        this.socket.send(queueName)
-      }
+    //   this.socket.onopen = () => {
+    //     console.log('✅ WebSocket连接已建立')
+    //     this.socket.send(queueName)
+    //   }
 
-      this.socket.onmessage = event => {
-        try {
-          const data = JSON.parse(event.data)
-          console.log('📨 收到JSON消息:', data)
+    //   this.socket.onmessage = event => {
+    //     try {
+    //       const data = JSON.parse(event.data)
+    //       console.log('📨 收到JSON消息:', data)
 
-          if (data && data.id) {
-            this.messages.push(data)
-          } else {
-            console.log('📨 收到无ID消息:', data)
-          }
-        } catch (error) {
-          // 如果不是JSON格式，直接处理字符串
-          console.log('📨 收到文本消息:', event.data)
+    //       if (data && data.id) {
+    //         this.messages.push(data)
+    //       } else {
+    //         console.log('📨 收到无ID消息:', data)
+    //       }
+    //     } catch (error) {
+    //       // 如果不是JSON格式，直接处理字符串
+    //       console.log('📨 收到文本消息:', event.data)
 
-          // 如果需要，你也可以处理这些文本消息
-          if (event.data.includes('开始获取队列') || event.data.includes('完成')) {
-            console.log('ℹ️ 系统状态消息:', event.data)
-          }
-        }
-      }
+    //       // 如果需要，你也可以处理这些文本消息
+    //       if (event.data.includes('开始获取队列') || event.data.includes('完成')) {
+    //         console.log('ℹ️ 系统状态消息:', event.data)
+    //       }
+    //     }
+    //   }
 
-      this.socket.onclose = event => {
-        console.log('❌ 连接已关闭', event.code, event.reason)
-      }
+    //   this.socket.onclose = event => {
+    //     console.log('❌ 连接已关闭', event.code, event.reason)
+    //   }
 
-      this.socket.onerror = error => {
-        console.log('💥 WebSocket错误:', error)
-        // 显示错误信息到页面
-      }
-    },
+    //   this.socket.onerror = error => {
+    //     console.log('💥 WebSocket错误:', error)
+    //     // 显示错误信息到页面
+    //   }
+    // },
 
     disconnect() {
       if (this.socket) {
@@ -605,4 +635,6 @@ export default {
   transform: rotateZ(180deg);
   color: #409eff;
 }
+
+
 </style>

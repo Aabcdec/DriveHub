@@ -1,14 +1,13 @@
 <template>
-  // 将v-model改为:visible，并保留@update:visible事件
+  <!-- 正确使用 v-model 和双向绑定机制 -->
   <el-dialog 
-    :visible="visible"
-    @update:visible="handleUpdateVisible"
+    v-model="visible"
     title="跟进记录管理"
     width="900px"
     :close-on-click-modal="false"
   >
     <div class="follow-container">
-      <!-- 线索基本信息 -->
+      <!-- 修复：移除重复定义，只保留正确的threadData引用 -->
       <div class="follow-info-header">
         <h3>{{ threadData.fullName ? threadData.fullName : '未知客户' }} - 跟进记录</h3>
         <el-tag type="primary">线索ID: {{ threadData.id }}</el-tag>
@@ -20,16 +19,17 @@
           <div class="card-header">
             <span>历史跟进记录</span>
             <el-button type="primary" size="small" @click="addNewFollow">
-              <el-icon><Plus /></el-icon>
+              <el-icon>
+                <Plus />
+              </el-icon>
               新增跟进
             </el-button>
           </div>
         </template>
 
         <div v-if="followRecords && followRecords.length > 0" class="follow-content">
-          <el-table :data="followRecords" style="width: 100%" stripe size="small" 
-                   v-loading="loading" element-loading-text="加载跟进记录中...">
-            <!-- 表格列定义 -->
+          <el-table :data="followRecords" style="width: 100%" stripe size="small" v-loading="followLoading"
+            element-loading-text="加载跟进记录中...">
             <el-table-column prop="id" label="ID" width="50" />
             <el-table-column prop="followType" label="跟进方式" width="80">
               <template #default="scope">
@@ -71,12 +71,13 @@
           </el-table>
         </div>
 
+        <!-- 无数据提示 -->
         <div v-else class="no-follow-data">
           <el-empty description="暂无跟进记录" />
         </div>
       </el-card>
 
-      <!-- 新增/编辑跟进表单 -->
+      <!-- 新增跟进表单 -->
       <el-card v-if="showAddFollowForm" class="add-follow-card" shadow="never">
         <template #header>
           <div class="card-header">
@@ -113,25 +114,25 @@
             <el-input v-model="followForm.content" type="textarea" :rows="3" placeholder="请输入跟进内容" />
           </el-form-item>
           <el-form-item label="下次跟进时间" prop="nextFollowTime">
-            <el-date-picker v-model="followForm.nextFollowTime" type="datetime" 
-                           placeholder="选择下次跟进时间" format="YYYY-MM-DD HH:mm:ss" 
-                           value-format="YYYY-MM-DD HH:mm:ss" />
+            <el-date-picker v-model="followForm.nextFollowTime" type="datetime" placeholder="选择下次跟进时间"
+              format="YYYY-MM-DD HH:mm:ss" value-format="YYYY-MM-DD HH:mm:ss" />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="saveFollow" :loading="saving">
-              {{ saving ? '保存中...' : (editingFollow ? '更新跟进记录' : '保存跟进记录') }}
+            <el-button type="primary" @click="saveFollow" :loading="followSaving" :disabled="followSaving">
+              {{ followSaving ? '保存中...' : (editingFollow ? '更新跟进记录' : '保存跟进记录') }}
             </el-button>
-            <el-button @click="cancelAddFollow" :disabled="saving">取消</el-button>
+            <el-button @click="cancelAddFollow" :disabled="followSaving">取消</el-button>
           </el-form-item>
         </el-form>
       </el-card>
     </div>
-
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="closeDialog">关闭</el-button>
-        <el-button type="primary" @click="refreshRecords">
-          <el-icon><Refresh /></el-icon>
+        <el-button @click="handleClose">关闭</el-button>
+        <el-button type="primary" @click="refreshFollowRecords">
+          <el-icon>
+            <Refresh />
+          </el-icon>
           刷新记录
         </el-button>
       </div>
@@ -162,13 +163,17 @@ export default {
       default: () => ({})
     }
   },
+  model: {
+    prop: 'visible',
+    event: 'update:visible'
+  },
   emits: ['update:visible'],
   data() {
     return {
       followRecords: [],
       showAddFollowForm: false,
-      loading: false,
-      saving: false,
+      followLoading: false,  // 修复：统一使用followLoading状态
+      followSaving: false,   // 修复：使用正确的保存状态变量
       editingFollow: null,
       
       followForm: {
@@ -189,44 +194,64 @@ export default {
     }
   },
   watch: {
-    visible(newVal) {
-      if (newVal) {
-        this.loadFollowRecords()
-      }
+    visible: {
+      handler(newVal) {
+        if (newVal) {
+          this.loadFollowRecords()
+        }
+      },
+      immediate: true
+    },
+    threadData: {
+      handler(newData) {
+        if (this.visible && newData && newData.id) {
+          this.loadFollowRecords()
+        }
+      },
+      deep: true
     }
   },
   methods: {
-    handleUpdateVisible(value) {
-      if (!value) {
-        this.showAddFollowForm = false
-        this.resetForm()
-      }
-      this.$emit('update:visible', value)
+    // 实现缺失的handleClose方法
+    handleClose() {
+      this.$emit('update:visible', false)
+      this.resetForm()
     },
     
+    // 加载跟进记录 - 修复状态变量名
     async loadFollowRecords() {
-      if (!this.threadData.id) return
+      if (!this.threadData || !this.threadData.id) {
+        console.warn('threadData或threadData.id为空，无法加载跟进记录')
+        return
+      }
       
-      this.loading = true
+      this.followLoading = true
       try {
         const res = await doGet('/api/byIdFollow', { fId: this.threadData.id })
-        if (res.status === 200) {
+        if (res && res.status === 200) {
           this.followRecords = res.data || []
+        } else {
+          console.warn('获取跟进记录返回异常:', res)
+          ElMessage.warning('获取跟进记录失败')
+          this.followRecords = []
         }
       } catch (error) {
         console.error('加载跟进记录失败:', error)
         ElMessage.error('加载跟进记录失败')
+        this.followRecords = []
       } finally {
-        this.loading = false
+        this.followLoading = false
       }
     },
-
+    
+    // 新增跟进
     addNewFollow() {
       this.editingFollow = null
       this.resetForm()
       this.showAddFollowForm = true
     },
 
+    // 编辑跟进
     editFollow(record) {
       this.editingFollow = record
       this.followForm = {
@@ -238,6 +263,7 @@ export default {
       this.showAddFollowForm = true
     },
 
+    // 删除跟进
     async deleteFollow(record) {
       try {
         const res = await doGet('/api/byDeleteIdFollow', { 
@@ -254,10 +280,11 @@ export default {
       }
     },
 
+    // 保存跟进记录
     async saveFollow() {
       try {
-        this.saving = true
-        const valid = await this.$refs.followFormRef.validate()
+        this.followSaving = true
+        const valid = await this.$refs.followFormRef.validate().catch(() => false)
         if (!valid) return
 
         const data = {
@@ -276,48 +303,87 @@ export default {
           data.createTime = new Date().toISOString().slice(0, 19).replace('T', ' ')
         }
 
-        const apiUrl = this.editingFollow ? '/api/updateFollow' : '/api/saveFollow'
-        const res = await doPost(apiUrl, data)
-        
+        const res = await doPost(this.editingFollow ? '/api/updateFollow' : '/api/saveFollow', data)
         if (res.data === 1) {
           ElMessage.success(this.editingFollow ? '更新成功' : '保存成功')
-          this.cancelAddFollow()
+          this.showAddFollowForm = false
+          this.resetForm()
           this.loadFollowRecords()
+        } else {
+          ElMessage.error(this.editingFollow ? '更新失败' : '保存失败')
         }
       } catch (error) {
         console.error('保存失败:', error)
-        ElMessage.error('保存失败')
+        ElMessage.error('保存失败，请重试')
       } finally {
-        this.saving = false
+        this.followSaving = false
       }
     },
 
+    // 取消新增/编辑
     cancelAddFollow() {
       this.showAddFollowForm = false
-      this.editingFollow = null
       this.resetForm()
     },
 
+    // 重置表单
     resetForm() {
+      this.editingFollow = null
       this.followForm = {
         type: '',
         content: '',
         result: '',
         nextFollowTime: ''
       }
-      this.$refs.followFormRef?.clearValidate()
+      
+      this.$nextTick(() => {
+        if (this.$refs.followFormRef) {
+          this.$refs.followFormRef.clearValidate()
+        }
+      })
     },
 
-    refreshRecords() {
+    // 刷新记录
+    refreshFollowRecords() {
       this.loadFollowRecords()
-      ElMessage.success('已刷新')
-    },
-
-    closeDialog() {
-      this.$emit('update:visible', false)
     },
 
     // 工具方法
+    formatDateTime(dateTime) {
+      if (!dateTime) return '-' 
+      
+      try {
+        const date = new Date(dateTime)
+        if (isNaN(date.getTime())) return dateTime
+
+        const year = date.getFullYear()
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0')
+        const hours = String(date.getHours()).padStart(2, '0')
+        const minutes = String(date.getMinutes()).padStart(2, '0')
+        const seconds = String(date.getSeconds()).padStart(2, '0')
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+      } catch (error) {
+        console.error('日期格式化错误:', error)
+        return dateTime
+      }
+    },
+
+    getUserDisplayName(userId) {
+      if (!userId) return '未分配'
+
+      const userMap = {
+        1: '管理员',
+        2: '于嫣',
+        3: '张琪',
+        4: '苏婉婷',
+        5: '吴潇潇'
+      }
+
+      return userMap[userId] || `用户${userId}`
+    },
+
     getFollowTypeColor(type) {
       const colors = { phone: 'primary', email: 'success', wechat: 'warning', meeting: 'danger', other: 'info' }
       return colors[type] || 'info'
@@ -336,30 +402,6 @@ export default {
     getFollowResultLabel(result) {
       const labels = { 1: '成功', 2: '失败', 3: '待跟进', 4: '已完成' }
       return labels[result] || '未知'
-    },
-
-    getUserDisplayName(userId) {
-      const users = { 1: '管理员', 2: '于嫣', 3: '张琪', 4: '苏婉婷', 5: '吴潇潇' }
-      return users[userId] || `用户${userId}`
-    },
-
-    formatDateTime(dateTime) {
-      if (!dateTime) return '-'    
-      try {
-        const date = new Date(dateTime)
-        if (isNaN(date.getTime())) return dateTime
-        
-        const year = date.getFullYear()
-        const month = String(date.getMonth() + 1).padStart(2, '0')
-        const day = String(date.getDate()).padStart(2, '0')
-        const hours = String(date.getHours()).padStart(2, '0')
-        const minutes = String(date.getMinutes()).padStart(2, '0')
-        const seconds = String(date.getSeconds()).padStart(2, '0')
-        
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
-      } catch {
-        return dateTime
-      }
     }
   }
 }
@@ -380,10 +422,24 @@ export default {
   border-bottom: 1px solid #ebeef5;
 }
 
-.card-header {
+.follow-info-header h3 {
+  margin: 0;
+  color: #303133;
+  font-size: 18px;
+}
+
+.follow-records-card {
+  margin-bottom: 20px;
+}
+
+.follow-records-card .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.follow-content {
+  margin-top: 10px;
 }
 
 .no-follow-data {
@@ -393,7 +449,12 @@ export default {
 
 .add-follow-card {
   border: 1px dashed #d9d9d9;
-  margin-top: 20px;
+}
+
+.add-follow-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .dialog-footer {
