@@ -294,9 +294,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { doGet, doPost, doPut, doDelete } from '../../http/httpRequest.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchPageData } from '../../util/pagination.js'
+import { fetchPageData } from '../../utils/pagination.js'
 import { ZoomIn, Download, Delete, Plus } from '@element-plus/icons-vue'
-import { MassageTag } from '../../util/MassageTag.js'
+import { MassageTag } from '../../utils/MassageTag.js'
 
 export default {
   name: 'MarketCampaigns',

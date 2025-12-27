@@ -126,8 +126,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { doGet,doPost } from '../../http/httpRequest.js'
-import {fetchPageData} from '../../util/pagination.js'
-import {MassageTag} from '../../util/MassageTag.js'
+import {fetchPageData} from '../../utils/pagination.js'
+import {MassageTag} from '../../utils/MassageTag.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
 export default {
   inject:['reload'],

@@ -1,6 +1,6 @@
 
 const { defineConfig } = require('@vue/cli-service')
-
+const path = require('path')
 module.exports = defineConfig({
   // 禁用TypeScript检查
   transpileDependencies: true,
@@ -11,8 +11,13 @@ module.exports = defineConfig({
   // 配置webpack
   configureWebpack: {
     resolve: {
-      extensions: ['.js', '.vue', '.json']
+      extensions: ['.js', '.vue', '.json'],
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+        '@service': path.resolve(__dirname, 'src/service')
+      }
     }
+   
   },
 
   // 链式配置webpack

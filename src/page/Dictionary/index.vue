@@ -136,8 +136,8 @@
 /* eslint-disable */
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { doGet, doPost, doPut, doDelete } from '../../http/httpRequest'
-import { MassageTag } from '../../util/MassageTag'
-import { fetchPageData } from '../../util/pagination'
+import { MassageTag } from '../../utils/MassageTag'
+import { fetchPageData } from '../../utils/pagination'
 
 export default {
   name: 'DictionaryManagement',

@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { createRouter, createWebHistory } from 'vue-router'
-import { storageUtil } from '../util/Token.js'
+import { storageUtil } from '../utils/Token.js'
 import { ElMessage } from 'element-plus'
 import RoleManagement from '@/page/System/roleManagement';
 
@@ -29,6 +29,12 @@ const routes = [
     name: 'Register',
     component: () => import('../page/Register/index.vue'),
     meta: { requiresAuth: false, title: '用户注册' } // 注册页不需要权限
+  },
+   {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('../page/Dashboard/DataDashboard.vue'),
+    meta: { requiresAuth: true, title: '数据大屏' } // 数据大屏需要权限
   },
   {
     path:'/home',

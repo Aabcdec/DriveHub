@@ -409,7 +409,7 @@
 <script>
 import { doGet, doPost, doPut, doDelete } from '../../http/httpRequest.js'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchPageData } from '../../util/pagination.js'
+import { fetchPageData } from '../../utils/pagination.js'
 import { Plus, Edit, ChatDotRound, Document, Refresh } from '@element-plus/icons-vue'
 
 export default {
