@@ -3,7 +3,7 @@ package com.example.web.query;
 import lombok.Data;
 
 @Data
-public class signUpActiveProductQuery {
+public class SignUpActiveProductQuery {
     private Integer ownerId;
     private String actName;
     private String description;

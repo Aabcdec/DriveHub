@@ -19,7 +19,7 @@ public interface TCustomerDao {
 
     int updateByPrimaryKey(TCustomer record);
     List<TCustomer> getCustomer();
-    List<marketQuery> getMarketTypes();
+    List<MarketQuery> getMarketTypes();
 
     int deleteByIdCustom(@Param("id") Integer id);
 
@@ -28,7 +28,7 @@ public interface TCustomerDao {
 
     List<TCustomer> selectCustomerByExcel(@Param("idList") List<String> idList);
 
-    List<TCustomer> BysearchCustomer(searchCustomerQuery searchCustomerQuery);
+    List<TCustomer> BysearchCustomer(SearchCustomerQuery SearchCustomerQuery);
 
     Integer selectByCount();
 

@@ -4,14 +4,14 @@ import javax.annotation.Resource;
 
 
 public class TokenWrapper {
-    private tokenBean value;
+    private TokenBean value;
     private long expireTime;
 
-    public tokenBean getValue() {
+    public TokenBean getValue() {
         return value;
     }
 
-    public void setValue(tokenBean value) {
+    public void setValue(TokenBean value) {
         this.value = value;
     }
 

@@ -5,14 +5,14 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 
 
-public class tokenBean {
+public class TokenBean {
     private Integer id;
     private String token;
     private String name;
 
     @Override
     public String toString() {
-        return "tokenBean{" +
+        return "TokenBean{" +
                 "id=" + id +
                 ", token='" + token + '\'' +
                 ", name='" + name + '\'' +
@@ -43,12 +43,12 @@ public class tokenBean {
         this.name = name;
     }
 
-    public tokenBean(Integer id, String token, String name) {
+    public TokenBean(Integer id, String token, String name) {
         this.id = id;
         this.token = token;
         this.name = name;
     }
 
-    public tokenBean() {
+    public TokenBean() {
     }
 }

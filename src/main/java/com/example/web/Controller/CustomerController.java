@@ -2,7 +2,7 @@ package com.example.web.Controller;
 
 import com.alibaba.excel.EasyExcel;
 import com.example.web.Bean.TCustomer;
-import com.example.web.Servlet.TCudtomerServlet;
+import com.example.web.service.CustomerService;
 import com.example.web.query.*;
 import com.example.web.util.TokenUtil;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -20,22 +20,25 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * 客户相关 REST 接口。路径含历史拼写 {@code /sreachCustomerPage}，不可改动。
+ */
 @RestController
 public class CustomerController {
     private static  final  String REDIS_CLUE_Key="clueKey";
     @Resource
-    private TCudtomerServlet tCudtomerServlet;
+    private CustomerService customerService;
     @Resource
     private TokenUtil tokenUtil;
     @Resource
     private RedisTemplate redisTemplate;
     @GetMapping("/getCustomer")
     public List<TCustomer> getAllCustomer(){
-        return tCudtomerServlet.getCustomer();
+        return customerService.getCustomer();
     }
     @GetMapping("/getMarketTypes")
-    public List<marketQuery>getMarketTypes(){
-        return tCudtomerServlet.getMarketTypes();
+    public List<MarketQuery>getMarketTypes(){
+        return customerService.getMarketTypes();
     }
     @PostMapping("/convertCustomer/{pageNum}")
     public int convertCustomer(@PathVariable("pageNum") Integer pageNum,@RequestBody TCustomer tCustomer, HttpServletRequest request){
@@ -50,7 +53,7 @@ public class CustomerController {
         tCustomer1.setNextContactTime(tCustomer.getNextContactTime());
         tCustomer1.setCreateTime(new Date());
         tCustomer1.setCreateBy(tokenWrapper.getValue().getId());
-        int i = tCudtomerServlet.SaveCustomr(tCustomer1, createBy);
+        int i = customerService.SaveCustomr(tCustomer1, createBy);
         if(i>0){
             redisTemplate.delete(REDIS_CLUE_Key+pageNum+":10");
         }
@@ -58,22 +61,22 @@ public class CustomerController {
     }
     @GetMapping("/selectCustomerPage")
     public List<TCustomer> selectCustomerPage(@RequestParam("pageNum") Integer pageNum, @RequestParam("pageSize") Integer pageSize){
-        return tCudtomerServlet.selectCustomerPage(pageNum,pageSize);
+        return customerService.selectCustomerPage(pageNum,pageSize);
     }
     //跟进条件筛选客户
     @PostMapping("/sreachCustomerPage")
-    public List<TCustomer> BysearchCustomer(@RequestBody searchCustomerQuery searchCustomerQuery){
-        return tCudtomerServlet.BysearchCustomer(searchCustomerQuery);
+    public List<TCustomer> BysearchCustomer(@RequestBody SearchCustomerQuery SearchCustomerQuery){
+        return customerService.BysearchCustomer(SearchCustomerQuery);
     }
     //跟新客户信息
     @PutMapping("/clients/{id}")
     public int updataCustomer(@PathVariable Long id,
                               @RequestBody CustomerForm customerForm){
-        return tCudtomerServlet.updataCustomer(id,customerForm);
+        return customerService.updataCustomer(id,customerForm);
     }
     @GetMapping("/getCustomerIds")
     public List<Long> getCustomerId(){
-      return  tCudtomerServlet.getCustomerId();
+      return  customerService.getCustomerId();
     }
 
     @GetMapping(value = "/exportExcel")
@@ -86,7 +89,7 @@ public class CustomerController {
         //2、后端查询数据库的数据，把数据写入Excel，然后把Excel以IO流的方式输出到前端浏览器（我们来实现）
         List<String> idList = StringUtils.hasText(ids) ? Arrays.asList(ids.split(",")) : new ArrayList<>();
         System.out.println(idList);
-        List<CustomerExcel> dataList = tCudtomerServlet.getCustomerByExcel(idList);
+        List<CustomerExcel> dataList = customerService.getCustomerByExcel(idList);
         EasyExcel.write(response.getOutputStream(), CustomerExcel.class)
                 .sheet()
                 .doWrite(dataList);

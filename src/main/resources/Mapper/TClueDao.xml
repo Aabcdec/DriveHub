@@ -188,6 +188,7 @@
         AND ${query.filterSQL}
       </if>
     </where>
+    order by tc.create_time desc
     LIMIT #{pageNum}, #{pageSize}
   </select>
   <select id="selectCustomerPage" resultType="com.example.web.Bean.TClue" resultMap="ClueResultMap">

@@ -1,7 +1,7 @@
 package com.example.web.Controller;
 
 import com.example.web.Bean.TTranRemark;
-import com.example.web.Servlet.TranRemarkServelt;
+import com.example.web.service.TranRemarkService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -11,13 +11,13 @@ import java.util.List;
 @RestController
 public class TranRemarkController {
     @Resource
-    private TranRemarkServelt tranRemarkServelt;
+    private TranRemarkService tranRemarkService;
     @PostMapping("/transactions/remarks/add")
     public int saveRemark(@RequestBody TTranRemark remark){
-        return  tranRemarkServelt.saveRemark(remark);
+        return  tranRemarkService.saveRemark(remark);
     }
     @GetMapping("/transactions/remarks")
     public List<TTranRemark> getByIdList(@RequestParam("tranId")Integer tranId){
-        return tranRemarkServelt.getByIdList(tranId);
+        return tranRemarkService.getByIdList(tranId);
     }
 }

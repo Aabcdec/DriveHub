@@ -12,7 +12,7 @@
     <result column="edit_time" jdbcType="TIMESTAMP" property="editTime" />
     <result column="edit_by" jdbcType="INTEGER" property="editBy" />
   </resultMap>
-  <resultMap id="marketResultMap" type="com.example.web.query.marketQuery">
+  <resultMap id="marketResultMap" type="com.example.web.query.MarketQuery">
     <id column="max_id" jdbcType="INTEGER" property="maxID" />
     <result column="active_type" jdbcType="INTEGER" property="activeType" />
     <result column="total" jdbcType="INTEGER" property="total" />
@@ -118,10 +118,12 @@
                         left join t_dic_value tdv4 on tc.state = tdv4.id
                         left join t_dic_value tdv5 on tc.source = tdv5.id
                         left join t_product tp on tct.product = tp.id
+                        order by tct.create_time desc
       LIMIT #{pageNum}, #{pageSize}
+
   </select>
 
-  <select id="getMarketTypes" resultType="com.example.web.query.marketQuery" resultMap="marketResultMap">
+  <select id="getMarketTypes" resultType="com.example.web.query.MarketQuery" resultMap="marketResultMap">
     SELECT active_type, COUNT(*) AS total,MAX(id) AS max_id
     FROM t_activity
     GROUP BY active_type;

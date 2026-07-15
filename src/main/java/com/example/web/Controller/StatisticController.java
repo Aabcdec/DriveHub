@@ -4,7 +4,7 @@ package com.example.web.Controller;
 import com.example.web.Result.NameValue;
 import com.example.web.Result.R;
 import com.example.web.Result.SummaryData;
-import com.example.web.Servlet.StatisticService;
+import com.example.web.service.StatisticService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;

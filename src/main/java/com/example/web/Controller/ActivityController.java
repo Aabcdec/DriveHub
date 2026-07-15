@@ -2,10 +2,10 @@ package com.example.web.Controller;
 
 import com.example.web.Bean.TActivity;
 import com.example.web.Bean.TClue;
-import com.example.web.Servlet.ActivityServlet;
+import com.example.web.service.ActivityService;
 import com.example.web.query.ActiveProductQuery;
 import com.example.web.query.IdListRequest;
-import com.example.web.query.myUpSignUpDataQuery;
+import com.example.web.query.MyUpSignUpDataQuery;
 import org.redisson.Redisson;
 import org.redisson.api.RLock;
 import org.springframework.data.redis.core.RedisCallback;
@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 public class ActivityController {
     @Resource
-    private ActivityServlet activityServlet;
+    private ActivityService activityService;
     @Resource
     private RedisTemplate redisTemplate;
     @Resource
@@ -43,7 +43,7 @@ public class ActivityController {
                 return activeList; // 缓存命中直接返回
             }
             // 3. 缓存未命中，查询数据库
-            List<TActivity> actives = activityServlet.getActs(pageNum,pageSize);
+            List<TActivity> actives = activityService.getActs(pageNum,pageSize);
             // 4. 写入缓存（即使空结果也缓存，避免穿透）
             redisTemplate.opsForValue().set(
                     cacheKey,
@@ -60,30 +60,30 @@ public class ActivityController {
                 lock.unlock();
             }
         }
-//        return activityServlet.getActs(pageNum,pageSize); //正常无缓存的情况
+//        return activityService.getActs(pageNum,pageSize); //正常无缓存的情况
     }
     @GetMapping("/updateActProduct/{id}")
     public int updateActProduct(@PathVariable("id")Integer id,@RequestParam("productId")Integer productId){
-        return activityServlet.updateActProduct(id,productId);
+        return activityService.updateActProduct(id,productId);
     }
     @GetMapping("/getActAll")
     public List<TActivity> getActAll(){
-        return activityServlet.getActAll();
+        return activityService.getActAll();
     }
     @PostMapping("/market/campaigns")
     public int updateActivityById(@RequestBody TActivity tActivity){
-        int i= activityServlet.updateByPrimaryKeySelective(tActivity);
+        int i= activityService.updateByPrimaryKeySelective(tActivity);
         if(i>0){
             System.out.println("前端传来的页码值"+tActivity.getCurrentPage());
             redisTemplate.delete(REDIS_ACTIVE_Key+tActivity.getCurrentPage()+":10");
         }
-//        return activityServlet.updateByPrimaryKeySelective(tActivity);
+//        return activityService.updateByPrimaryKeySelective(tActivity);
         return i;
     }
     @GetMapping("/market/delCampaignsById")
     public int updateActiverByIdAndCurrentPage(@RequestParam("id")Integer id,@RequestParam("currentPage")Integer currentPage){
         // 1. 删除数据库数据 这里采用软删除
-        int result = activityServlet.updateByIdActive(id);
+        int result = activityService.updateByIdActive(id);
         if (result > 0) {
 //            // 2. 删除该数据的独立缓存
 //            redisTemplate.delete("clue:" + id);
@@ -96,7 +96,7 @@ public class ActivityController {
     @PostMapping("/market/addCampaigns")
     public int addActivity(@RequestBody TActivity tActivity){
         System.out.println(tActivity);
-        int i=  activityServlet.addTActivity(tActivity);
+        int i=  activityService.addTActivity(tActivity);
         if(i>0){
             //情空缓存 应该按照日期降序删第一页缓存
             redisTemplate.delete(REDIS_ACTIVE_Key+1+":10");
@@ -105,44 +105,44 @@ public class ActivityController {
 //                return null;
 //            });
         }
-//        return  activityServlet.addTActivity(tActivity);
+//        return  activityService.addTActivity(tActivity);
         return i;
     }
     @GetMapping("/market/delCampaigns")
     public int deleteById(@RequestParam("id") int id){
         System.out.println(id);
-        return activityServlet.deleteById(id);
+        return activityService.deleteById(id);
     }
     @PostMapping("/selectByIdAndDateRange")
     public List<TActivity> selectByIdAndDateRange(@RequestBody TActivity tActivity){
         System.out.println(tActivity.toString());
-        return activityServlet.queryByIdAndDate(tActivity.getId(),tActivity.getStartTime(),tActivity.getEndTime());
+        return activityService.queryByIdAndDate(tActivity.getId(),tActivity.getStartTime(),tActivity.getEndTime());
     }
     //获取最近活动
     @PostMapping("/selectByIdsAct")
     public List<TActivity>selectByIdsAct(@RequestBody IdListRequest ids){
-        return activityServlet.selectByIdsAct(ids.getIds());
+        return activityService.selectByIdsAct(ids.getIds());
     }
     //获取用户报名信息
     @PostMapping("/selectByIdsSignUpData")
-    public List<TActivity>selectByIdsSignUpData(@RequestBody myUpSignUpDataQuery myUpSignUpDataQuery){
-        return activityServlet.selectByIdsSignUpData(myUpSignUpDataQuery);
+    public List<TActivity>selectByIdsSignUpData(@RequestBody MyUpSignUpDataQuery MyUpSignUpDataQuery){
+        return activityService.selectByIdsSignUpData(MyUpSignUpDataQuery);
     }
     @GetMapping("/getActDetail")
     public ActiveProductQuery selectByPrimaryKey(@RequestParam("id") int id){
-        return activityServlet.selectByPrimaryKey(id);
+        return activityService.selectByPrimaryKey(id);
     }
     @PostMapping("/activity/register")
     private int increaseParticipants(@RequestBody int id){
-        return activityServlet.increaseParticipants(id);
+        return activityService.increaseParticipants(id);
     }
     @GetMapping("/updateParty")
     public Integer updateParty(@RequestParam("id") Integer id){
         System.out.println(id);
-        return activityServlet.updateParty(id);
+        return activityService.updateParty(id);
     }
     @GetMapping("/deleteParty")
     public Integer deleteParty(@RequestParam("id") Integer id){
-        return activityServlet.deleteParty(id);
+        return activityService.deleteParty(id);
     }
 }

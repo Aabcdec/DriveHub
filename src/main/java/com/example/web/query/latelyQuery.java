@@ -2,7 +2,7 @@ package com.example.web.query;
 
 import java.util.Date;
 
-public class latelyQuery {
+public class LatelyQuery {
     private int id;
     private String actName;
     private String activeType;
@@ -22,7 +22,7 @@ public class latelyQuery {
 
     @Override
     public String toString() {
-        return "latelyQuery{" +
+        return "LatelyQuery{" +
                 "id=" + id +
                 ", actName='" + actName + '\'' +
                 ", activeType='" + activeType + '\'' +
@@ -33,10 +33,10 @@ public class latelyQuery {
                 '}';
     }
 
-    public latelyQuery() {
+    public LatelyQuery() {
     }
 
-    public latelyQuery(int id, String actName, String activeType, Date startTime, Date endTime, int party, String active) {
+    public LatelyQuery(int id, String actName, String activeType, Date startTime, Date endTime, int party, String active) {
         this.id = id;
         this.actName = actName;
         this.activeType = activeType;

@@ -4,7 +4,7 @@ import com.example.web.Bean.TActivity;
 import com.example.web.commons.DataScope;
 import com.example.web.query.ActiveProductQuery;
 import com.example.web.query.BaseQuery;
-import com.example.web.query.myUpSignUpDataQuery;
+import com.example.web.query.MyUpSignUpDataQuery;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +28,7 @@ public interface TActivityDao {
     List<TActivity> getActAll();
     List<TActivity> selectByIdAndDateRange(TActivity tActivity);
     List<TActivity> selectByIdsAct(@Param("ids") List<Long> ids);
-    List<TActivity> selectByIdsSignUpData(myUpSignUpDataQuery myUpSignUpDataQuery);
+    List<TActivity> selectByIdsSignUpData(MyUpSignUpDataQuery MyUpSignUpDataQuery);
     @Update("UPDATE t_activity SET party = party + 1 WHERE id = #{id}")
     int increaseParticipants(@Param("id") Integer id);
     //从小程序来的数据通知人数加一

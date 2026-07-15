@@ -60,7 +60,7 @@
     <result column="product_id" jdbcType="VARCHAR" property="productId" />
   </resultMap>
 
-  <resultMap id="BaseResultLatelyMap" type="com.example.web.query.latelyQuery">
+  <resultMap id="BaseResultLatelyMap" type="com.example.web.query.LatelyQuery">
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="name" jdbcType="VARCHAR" property="actName" />
     <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
@@ -121,7 +121,9 @@
 <!--    select *from t_activity ta left join t_product tp on ta.product_id=tp.id where tp.state=0;-->
 <!--  </select>-->
   <select id="getActAll" resultType="com.example.web.query.ActiveProductQuery" resultMap="BaseActProResultMap">
-    select ta.*,tp.name AS productName,tp.quotation AS quotation from t_activity ta left join t_product tp on ta.product_id=tp.id where tp.state=0 and ta.isdelete=0;
+    select ta.*,tp.name AS productName,tp.quotation AS quotation
+    from t_activity ta left join t_product tp on ta.product_id=tp.id
+    where tp.state=0 and ta.isdelete=0 order by ta.create_time desc;
   </select>
 <!--  <select id="getActProAll" resultType="com.example.web.Bean.TActivity" resultMap="BaseResultMap">-->
 <!--    select ta.*,tp.name AS productName,tp.quotation from t_activity ta left join t_product tp on ta.product_id=tp.id where tp.state=0;-->

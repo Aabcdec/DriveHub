@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.util.Date;
 @Data
-public class signUpDateQuery {
+public class SignUpDateQuery {
     private long userId;
     private int actId;
     private String actName;

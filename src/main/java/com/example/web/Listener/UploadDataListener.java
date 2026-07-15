@@ -4,15 +4,15 @@ import com.alibaba.excel.context.AnalysisContext;
 import com.alibaba.excel.read.listener.ReadListener;
 import com.alibaba.excel.util.ListUtils;
 import com.example.web.Bean.TClue;
-import com.example.web.Bean.TUser;
 import com.example.web.Mapper.TClueDao;
-import jdk.nashorn.internal.parser.JSONParser;
 
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
-
+/**
+ * EasyExcel 线索导入监听器：批量写入 {@link TClueDao}。
+ */
 public class UploadDataListener implements ReadListener<TClue> {
 
     /**

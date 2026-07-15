@@ -7,7 +7,7 @@ import com.example.web.Bean.TDicValue;
 import com.example.web.Bean.TProduct;
 import com.example.web.Result.DicEnum;
 import com.example.web.Result.R;
-import com.example.web.Servlet.DicServlet;
+import com.example.web.service.DicService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 public class DicController {
     @Resource
-    private DicServlet dicServlet;
+    private DicService dicService;
     @GetMapping(value = "/dicvalue/{typeCode}")
     public R dicData(@PathVariable(value = "typeCode") String typeCode) {
         if (typeCode.equals(DicEnum.ACTIVITY.getCode())) { //activity
@@ -36,19 +36,19 @@ public class DicController {
                          @RequestParam("pageSize") Integer pageSize ,
                          @RequestParam("search") String searchKey){
 
-       return dicServlet.getAllType(pageNum,pageSize,searchKey);
+       return dicService.getAllType(pageNum,pageSize,searchKey);
     }
     @PutMapping("/dictionary/types")
     public int updateTypeData(@RequestBody TDicType tDicType){
-        return dicServlet.updateTypeData(tDicType);
+        return dicService.updateTypeData(tDicType);
     }
     @DeleteMapping("/dictionary/types/{id}")
     public int DeleteTypeData(@PathVariable("id")Integer id){
-        return dicServlet.DeleteTypeData(id);
+        return dicService.DeleteTypeData(id);
     }
     @PostMapping("/dictionary/types")
     public int addTypeData(@RequestBody TDicType tDicType){
-        return dicServlet.addTypeData(tDicType);
+        return dicService.addTypeData(tDicType);
     }
 
 }

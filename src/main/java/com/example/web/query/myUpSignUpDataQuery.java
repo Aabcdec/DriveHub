@@ -2,7 +2,7 @@ package com.example.web.query;
 
 import java.util.List;
 
-public class myUpSignUpDataQuery {
+public class MyUpSignUpDataQuery {
     private List<Long> ids;
     private String phone;
 
@@ -24,7 +24,7 @@ public class myUpSignUpDataQuery {
 
     @Override
     public String toString() {
-        return "myUpSignUpDataQuery{" +
+        return "MyUpSignUpDataQuery{" +
                 "ids=" + ids +
                 ", phone='" + phone + '\'' +
                 '}';

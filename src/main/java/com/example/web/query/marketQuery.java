@@ -1,13 +1,13 @@
 package com.example.web.query;
 
-public class marketQuery {
+public class MarketQuery {
     private String  activeType;
     private int total;
     private int maxID;
 
     @Override
     public String toString() {
-        return "marketQuery{" +
+        return "MarketQuery{" +
                 "activeType='" + activeType + '\'' +
                 ", total=" + total +
                 ", maxID=" + maxID +
@@ -38,10 +38,10 @@ public class marketQuery {
         this.maxID = maxID;
     }
 
-    public marketQuery() {
+    public MarketQuery() {
     }
 
-    public marketQuery(String activeType, int total, int maxID) {
+    public MarketQuery(String activeType, int total, int maxID) {
         this.activeType = activeType;
         this.total = total;
         this.maxID = maxID;
